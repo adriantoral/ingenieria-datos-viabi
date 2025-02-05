@@ -6,7 +6,7 @@ echo "🚀 Creando el namespace..."
 kubectl apply -f namespace.yaml
 
 echo "📦 Creando volúmenes persistentes para Kafka..."
-kubectl apply -f kafka/kafka-pv.yaml
+kubectl apply -f kafka/kafka-volume.yaml
 
 echo "🟢 Desplegando Kafka en modo KRaft..."
 kubectl apply -f kafka/kafka.yaml

@@ -1,56 +1,56 @@
 apiVersion: v1
 kind: Service
 metadata:
-	name: kafka
-	namespace: monitoring-stack
+  name: kafka
+  namespace: monitoring-stack
 spec:
-	selector:
-		app: kafka
-	ports:
-		- protocol: TCP
-		  port: 9092
-		  targetPort: 9092
+  selector:
+    app: kafka
+  ports:
+    - protocol: TCP
+      port: 9092
+      targetPort: 9092
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-	name: influxdb
-	namespace: monitoring-stack
+  name: influxdb
+  namespace: monitoring-stack
 spec:
-	selector:
-		app: influxdb
-	ports:
-		- protocol: TCP
-		  port: 8086
-		  targetPort: 8086
+  selector:
+    app: influxdb
+  ports:
+    - protocol: TCP
+      port: 8086
+      targetPort: 8086
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-	name: grafana
-	namespace: monitoring-stack
+  name: grafana
+  namespace: monitoring-stack
 spec:
-	selector:
-		app: grafana
-	ports:
-		- protocol: TCP
-		  port: 3000
-		  targetPort: 3000
-	type: NodePort
+  selector:
+    app: grafana
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+  type: NodePort
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-	name: minio
-	namespace: monitoring-stack
+  name: minio
+  namespace: monitoring-stack
 spec:
-	selector:
-		app: minio
-	ports:
-		- protocol: TCP
-		  port: 9000
-		  targetPort: 9000
-	type: NodePort
+  selector:
+    app: minio
+  ports:
+    - protocol: TCP
+      port: 9000
+      targetPort: 9000
+  type: NodePort
