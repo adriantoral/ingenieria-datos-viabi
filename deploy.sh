@@ -5,11 +5,8 @@ NAMESPACE="monitoring-stack"
 echo "🚀 Creando el namespace..."
 kubectl apply -f namespace.yaml
 
-echo "📦 Creando volúmenes persistentes para Kafka..."
-kubectl apply -f kafka/kafka-volume.yaml
-
-echo "🟢 Desplegando Kafka en modo KRaft..."
-kubectl apply -f kafka/kafka.yaml
+echo "🟢 Desplegando RabbitMQ..."
+kubectl apply -f rabbitmq/rabbitmq.yaml
 
 echo "📊 Desplegando InfluxDB..."
 kubectl apply -f influxdb/influxdb.yaml
