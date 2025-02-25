@@ -1,40 +1,14 @@
-apiVersion: apps/v1
-kind: StatefulSet
+# nonk8s
+apiVersion: rabbitmq.com/v1beta1
+kind: RabbitmqCluster
 metadata:
-  name: rabbitmq
+  name: rabbitmq-cluster
   namespace: monitoring-stack
 spec:
-  serviceName: rabbitmq-headless
   replicas: 3
-  selector:
-    matchLabels:
-      app: rabbitmq
-  template:
-    metadata:
-      labels:
-        app: rabbitmq
-    spec:
-      containers:
-        - name: rabbitmq
-          image: rabbitmq:3-management
-          ports:
-            - containerPort: 5672
-              name: amqp
-            - containerPort: 15672
-              name: management
-          env:
-            - name: RABBITMQ_DEFAULT_USER
-              value: "admin"
-            - name: RABBITMQ_DEFAULT_PASS
-              value: "admin"
-          volumeMounts:
-            - name: rabbitmq-data
-              mountPath: /var/lib/rabbitmq
-  volumeClaimTemplates:
-    - metadata:
-        name: rabbitmq-data
-      spec:
-        accessModes: [ "ReadWriteOnce" ]
-        resources:
-          requests:
-            storage: 1Gi
+  rabbitmq:
+    additionalConfig: |
+      default_user = admin
+      default_pass = admin
+  service:
+    type: NodePort
