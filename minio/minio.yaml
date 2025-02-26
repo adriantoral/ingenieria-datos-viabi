@@ -2,8 +2,9 @@ apiVersion: v1
 kind: Service
 metadata:
   name: minio-service
+  namespace: monitoring-stack
   labels:
-    app: minio
+    app: minio-deployment
 spec:
   type: NodePort
   ports:
@@ -14,24 +15,26 @@ spec:
       targetPort: 9001
       name: console
   selector:
-    app: minio
+    app: minio-deployment
+
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: minio
+  name: minio-deployment
+  namespace: monitoring-stack
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: minio
+      app: minio-deployment
   template:
     metadata:
       labels:
-        app: minio
+        app: minio-deployment
     spec:
       containers:
-        - name: minio
+        - name: minio-deployment
           image: minio/minio:latest
           args:
             - server
@@ -42,7 +45,7 @@ spec:
             - name: MINIO_ROOT_USER
               value: "admin"
             - name: MINIO_ROOT_PASSWORD
-              value: "password123"
+              value: "admin"
           ports:
             - containerPort: 9000
               name: api
@@ -53,4 +56,4 @@ spec:
               mountPath: /data
       volumes:
         - name: data
-          emptyDir: {}
+          emptyDir: { }

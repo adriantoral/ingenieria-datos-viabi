@@ -2,7 +2,7 @@
 apiVersion: rabbitmq.com/v1beta1
 kind: RabbitmqCluster
 metadata:
-  name: rabbitmq-cluster
+  name: rabbitmq-service
   namespace: monitoring-stack
 spec:
   replicas: 3
