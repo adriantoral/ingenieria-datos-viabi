@@ -49,10 +49,21 @@ def save_video_to_minio(video_bytes):
         return None
 
 
-def analyze_video(video_path):
+def analyze_video(video_bytes):
     """
-    Analiza un video y devuelve estadísticas como cantidad de frames, FPS, resolución, duración, etc.
+    Analiza un video desde los bytes recibidos y devuelve estadísticas:
+    - Frames
+    - FPS
+    - Resolución
+    - Duración
     """
+    video_array = np.frombuffer(video_bytes, np.uint8)
+    video_path = f"/tmp/{uuid.uuid4()}.mp4"
+
+    # Guardar temporalmente para analizarlo con OpenCV
+    with open(video_path, 'wb') as f:
+        f.write(video_array)
+
     cap = cv2.VideoCapture(video_path)
     
     if not cap.isOpened():
@@ -80,20 +91,16 @@ def process_video(body):
     """
     Procesa un video recibido:
     1. Guarda el video en MinIO.
-    2. Descarga el video y analiza sus frames, resolución y duración.
-    3. Guarda los metadatos en InfluxDB.
+    2. Analiza el video.
+    3. Envía los metadatos a InfluxDB.
     """
     try:
         video_key = save_video_to_minio(body)
         if not video_key:
             return
 
-        # Descargar el video desde MinIO para análisis
-        video_path = f"/tmp/{video_key}"
-        s3_client.download_file(MINIO_BUCKET, video_key, video_path)
-
-        # Analizar el video
-        analysis = analyze_video(video_path)
+        # Analizar el video directamente desde el body recibido
+        analysis = analyze_video(body)
         if not analysis:
             return
 
@@ -108,7 +115,7 @@ def process_video(body):
 
         write_api.write(bucket=INFLUXDB_BUCKET, org=INFLUXDB_ORG, record=point)
 
-        logger.info(f"Video {video_key} analizado y guardado en InfluxDB.")
+        logger.info(f"Video {video_key} analizado y metadatos guardados en InfluxDB.")
 
     except Exception as e:
         logger.error(f"Error al procesar el video: {e}")
