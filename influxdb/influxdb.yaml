@@ -2,8 +2,9 @@ apiVersion: v1
 kind: Service
 metadata:
   name: influxdb-service
+  namespace: monitoring-stack
   labels:
-    app: influxdb
+    app: influxdb-deployment
 spec:
   type: NodePort
   ports:
@@ -11,24 +12,26 @@ spec:
       targetPort: 8086
       name: api
   selector:
-    app: influxdb
+    app: influxdb-deployment
+
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: influxdb
+  name: influxdb-deployment
+  namespace: monitoring-stack
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: influxdb
+      app: influxdb-deployment
   template:
     metadata:
       labels:
-        app: influxdb
+        app: influxdb-deployment
     spec:
       containers:
-        - name: influxdb
+        - name: influxdb-deployment
           image: influxdb:2.7.1  # Puedes cambiar a la versión que prefieras
           ports:
             - containerPort: 8086
@@ -40,7 +43,7 @@ spec:
             - name: DOCKER_INFLUXDB_INIT_USERNAME
               value: "admin"
             - name: DOCKER_INFLUXDB_INIT_PASSWORD
-              value: "password123"
+              value: "admin"
             - name: DOCKER_INFLUXDB_INIT_ORG
               value: "miorganizacion"
             - name: DOCKER_INFLUXDB_INIT_BUCKET
@@ -50,4 +53,4 @@ spec:
               mountPath: /var/lib/influxdb2
       volumes:
         - name: influxdb-storage
-          emptyDir: {}  # Para entornos de pruebas; en producción usa un PVC para persistencia
+          emptyDir: { }  # Para entornos de pruebas; en producción usa un PVC para persistencia
