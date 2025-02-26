@@ -1,3 +1,11 @@
+# [1.1.0](https://github.com/adriantoral/ingenieria-datos-viabi/compare/v1.0.0...v1.1.0) (2025-02-26)
+
+
+### Features
+
+* add yaml for influxdb and minio deployments ([316a2cd](https://github.com/adriantoral/ingenieria-datos-viabi/commit/316a2cd40330bd572fda5550f8004b1b1fdf2ae4))
+* add yaml for influxdb and minio deployments ([66f98db](https://github.com/adriantoral/ingenieria-datos-viabi/commit/66f98db3bae60c18f1600ee9b0d1b66d706ad6a7))
+
 # 1.0.0 (2025-02-26)
 
 
