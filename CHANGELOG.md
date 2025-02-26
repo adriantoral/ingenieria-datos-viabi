@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/adriantoral/ingenieria-datos-viabi/compare/v1.1.0...v1.2.0) (2025-02-26)
+
+
+### Features
+
+* add producer and cosumer ([a5c80ba](https://github.com/adriantoral/ingenieria-datos-viabi/commit/a5c80bac8abbc1ff7616595fba6021e31747c445))
+
 # [1.1.0](https://github.com/adriantoral/ingenieria-datos-viabi/compare/v1.0.0...v1.1.0) (2025-02-26)
 
 
