@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/adriantoral/ingenieria-datos-viabi/compare/v1.2.0...v1.2.1) (2025-02-26)
+
+
+### Bug Fixes
+
+* actualiza los deployments de influxdb, minio, rabbitmq y el consumer ([12dfe7f](https://github.com/adriantoral/ingenieria-datos-viabi/commit/12dfe7ff659718432cd1c38fae0103360a0119b9))
+
 # [1.2.0](https://github.com/adriantoral/ingenieria-datos-viabi/compare/v1.1.0...v1.2.0) (2025-02-26)
 
 
