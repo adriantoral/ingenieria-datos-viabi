@@ -1,3 +1,10 @@
+## [1.2.2](https://github.com/adriantoral/ingenieria-datos-viabi/compare/v1.2.1...v1.2.2) (2025-02-26)
+
+
+### Bug Fixes
+
+* elimina los servicios obsoletos ([ddb8831](https://github.com/adriantoral/ingenieria-datos-viabi/commit/ddb88311dbb3db41a4e5c80cb0cb4ac26f4ed199))
+
 ## [1.2.1](https://github.com/adriantoral/ingenieria-datos-viabi/compare/v1.2.0...v1.2.1) (2025-02-26)
 
 
