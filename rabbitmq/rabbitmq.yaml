@@ -9,6 +9,6 @@ spec:
   rabbitmq:
     additionalConfig: |
       default_user = admin
-      default_pass = admin
+      default_pass = Admin@12345
   service:
     type: NodePort

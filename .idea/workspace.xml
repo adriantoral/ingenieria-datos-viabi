@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="9795e97a-60f5-4880-a74f-7e70b8b28d22" name="Changes" comment="fix: actualiza el consumer&#10;&#10;Closes VIABI-49">
+      <change afterPath="$PROJECT_DIR$/.idea/git_toolbox_blame.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/ingenieria-datos-viabi.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/consumer/consumer.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/consumer/consumer.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/consumer/install.sh" beforeDir="false" afterPath="$PROJECT_DIR$/consumer/install.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/consumer/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/consumer/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/influxdb/influxdb.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/influxdb/influxdb.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minio/minio.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/minio/minio.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rabbitmq/rabbitmq.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/rabbitmq/rabbitmq.yaml" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ChangesViewManager">
+    <option name="groupingKeys">
+      <option value="directory" />
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="feature/VIABI-49" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitToolBoxStore">
+    <option name="recentBranches">
+      <RecentBranches>
+        <option name="branchesForRepo">
+          <list>
+            <RecentBranchesForRepo>
+              <option name="branches">
+                <list>
+                  <RecentBranch>
+                    <option name="branchName" value="develop" />
+                    <option name="lastUsedInstant" value="1741191519" />
+                  </RecentBranch>
+                  <RecentBranch>
+                    <option name="branchName" value="feature/VIABI-49" />
+                    <option name="lastUsedInstant" value="1741191518" />
+                  </RecentBranch>
+                </list>
+              </option>
+              <option name="repositoryRootUrl" value="file://$PROJECT_DIR$" />
+            </RecentBranchesForRepo>
+          </list>
+        </option>
+      </RecentBranches>
+    </option>
+  </component>
+  <component name="GithubDefaultAccount">
+    <option name="defaultAccountId" value="e4ff2bae-d292-482a-a001-82ce240f4caa" />
+  </component>
+  <component name="KubernetesApiPersistence">{}</component>
+  <component name="KubernetesApiProvider">{
+  &quot;isMigrated&quot;: true
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 7
+}</component>
+  <component name="ProjectId" id="2tatjEZJMKL3W3X7tB035BtEp1w" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;SONARLINT_PRECOMMIT_ANALYSIS&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;develop&quot;,
+    &quot;ignore_missing_gitignore&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/adriantoral/proyectos/ingenieria-datos-viabi&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-76f8388c3a79-JavaScript-PY-243.24978.54" />
+        <option value="bundled-python-sdk-91e3b7efe1d4-466328ff949b-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-243.24978.54" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="9795e97a-60f5-4880-a74f-7e70b8b28d22" name="Changes" comment="" />
+      <created>1740602146583</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1740602146583</updated>
+      <workItem from="1740602147990" duration="285000" />
+      <workItem from="1740602464126" duration="373000" />
+      <workItem from="1740602975166" duration="195000" />
+      <workItem from="1740603196421" duration="275000" />
+      <workItem from="1740603489091" duration="50000" />
+      <workItem from="1740603698951" duration="231000" />
+      <workItem from="1740603956861" duration="2101000" />
+      <workItem from="1741191501468" duration="349000" />
+      <workItem from="1741192657250" duration="694000" />
+      <workItem from="1741193827174" duration="2803000" />
+    </task>
+    <task id="LOCAL-00001" summary="fix: actualiza el consumer&#10;&#10;Closes VIABI-49">
+      <option name="closed" value="true" />
+      <created>1740606049139</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1740606049139</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="RECENT_FILTERS">
+      <map>
+        <entry key="Branch">
+          <value>
+            <list>
+              <RecentGroup>
+                <option name="FILTER_VALUES">
+                  <option value="HEAD" />
+                </option>
+              </RecentGroup>
+            </list>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="HEAD" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="chore(release): 1.2.0 [skip ci]&#10;&#10;# [1.2.0](https://github.com/adriantoral/ingenieria-datos-viabi/compare/v1.1.0...v1.2.0) (2025-02-26)&#10;&#10;### Features&#10;&#10;* add producer and cosumer ([a5c80ba](https://github.com/adriantoral/ingenieria-datos-viabi/commit/a5c80bac8abbc1ff7616595fba6021e31747c445))" />
+    <MESSAGE value="feat: implement image upload to MinIO and InfluxDB with RabbitMQ integration" />
+    <MESSAGE value="fix: actualiza el consumer&#10;&#10;Closes VIABI-49" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix: actualiza el consumer&#10;&#10;Closes VIABI-49" />
+  </component>
+</project>

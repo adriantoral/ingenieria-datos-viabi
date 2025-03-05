@@ -43,7 +43,7 @@ spec:
             - name: DOCKER_INFLUXDB_INIT_USERNAME
               value: "admin"
             - name: DOCKER_INFLUXDB_INIT_PASSWORD
-              value: "admin"
+              value: "Admin@12345"
             - name: DOCKER_INFLUXDB_INIT_ORG
               value: "miorganizacion"
             - name: DOCKER_INFLUXDB_INIT_BUCKET

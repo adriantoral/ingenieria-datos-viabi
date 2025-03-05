@@ -17,21 +17,20 @@ spec:
     spec:
       containers:
         - name: consumer-deployment
-          image: consumer-deployment:latest
-          imagePullPolicy: Never
+          image: adriitoral/viabi-consumer:latest
           env:
             - name: CONFIG_MINIO_URL
               value: "minio-service.monitoring-stack.svc.cluster.local:9000"
             - name: CONFIG_MINIO_ACCESS_KEY
               value: "admin"
             - name: CONFIG_MINIO_SECRET_KEY
-              value: "admin"
+              value: "Admin@12345"
             - name: CONFIG_MINIO_BUCKET
               value: "intrusiones"
             - name: CONFIG_INFLUX_URL
               value: "influxdb-service.monitoring-stack.svc.cluster.local:8086"
             - name: CONFIG_INFLUX_TOKEN
-              value: 'DJX9QsBpBUJkI3V50B40np4OfT_LuYPHvHbPwiD5-gg_mfAJ84rlQ8Zf2swi4Fua60sXXAXskJ0XkGQY1sOxpg=='
+              value: 'Bg1W8hRrlLW0lsngsHnXQ6KJH-TPdVOP5DpTWSBkGxBxIULGLv_GA157NwdSjmxJ8E-8_2YZ4yvuFcZfnt_mJw=='
             - name: CONFIG_INFLUX_ORG
               value: "miorganizacion"
             - name: CONFIG_INFLUX_BUCKET
@@ -41,6 +40,6 @@ spec:
             - name: CONFIG_RABBITMQ_USERNAME
               value: "admin"
             - name: CONFIG_RABBITMQ_PASSWORD
-              value: "admin"
+              value: "Admin@12345"
             - name: CONFIG_RABBITMQ_QUEUE
               value: "images"
