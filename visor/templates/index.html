@@ -1,10 +1,17 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Visor en Tiempo Real</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Video en Tiempo Real</h1>
-    <img src="{{ url_for('video_feed') }}" width="70%">
+    <div class="container">
+        <h1>📹 Visor en Tiempo Real</h1>
+        <div class="video-wrapper">
+            <img src="{{ url_for('video_feed') }}" alt="Stream en vivo">
+        </div>
+    </div>
 </body>
 </html>
