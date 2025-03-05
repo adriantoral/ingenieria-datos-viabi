@@ -103,17 +103,20 @@ def upload_image_to_influx ( influx, image_name, image_url ):
 	write_api.close( )
 
 
-@try_catch_decorator
 def callback ( minio, influx, ch, method, properties, body ):
-	print( 'OK: ', body[:10], '...' )
+	try:
+		print( 'OK: ', body[:10], '...' )
 
-	image_name, image_url = upload_image_to_minio( minio, body )
-	if image_url: upload_image_to_influx( influx, image_name, image_url )
+		image_name, image_url = upload_image_to_minio( minio, body )
+		if image_url:
+			upload_image_to_influx( influx, image_name, image_url )
 
-	ch.basic_ack( delivery_tag=method.delivery_tag )
+		ch.basic_ack( delivery_tag=method.delivery_tag )  # Confirmar mensaje
+	except Exception as e:
+		print( f"Error en callback: {e}" )
+		ch.basic_nack( delivery_tag=method.delivery_tag, requeue=False )  # No reenviar mensaje
 
 
-@try_catch_decorator
 def signal_handler ( influx, rabbit, sig, frame ):
 	if influx: influx.close( )
 	if rabbit: rabbit.close( )
@@ -129,10 +132,11 @@ if __name__ == '__main__':
 	signal.signal( signal.SIGTERM, lambda sig, frame: signal_handler( influx_client, rabbitmq_client, sig, frame ) )
 
 	channel = rabbitmq_client.channel( )
-	channel.queue_declare( queue=CONFIG_RABBITMQ['queue'] )
+	channel.queue_declare( queue=CONFIG_RABBITMQ['queue'], durable=True )  # Asegurar que la cola persista
+
 	channel.basic_consume(
 		queue=CONFIG_RABBITMQ['queue'],
-		auto_ack=True,
+		auto_ack=False,  # Se cambia a False para manejar los acks manualmente
 		on_message_callback=lambda ch, method, properties, body: callback(
 			minio_client,
 			influx_client,
