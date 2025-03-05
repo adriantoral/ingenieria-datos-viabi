@@ -1,3 +1,10 @@
+## [1.2.4](https://github.com/adriantoral/ingenieria-datos-viabi/compare/v1.2.3...v1.2.4) (2025-03-05)
+
+
+### Bug Fixes
+
+* actualiza el consumer para enviar ack manual ([a8db6e9](https://github.com/adriantoral/ingenieria-datos-viabi/commit/a8db6e926f586ea1ba3e25484356b9090c7552fc))
+
 ## [1.2.3](https://github.com/adriantoral/ingenieria-datos-viabi/compare/v1.2.2...v1.2.3) (2025-03-05)
 
 
