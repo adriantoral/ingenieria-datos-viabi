@@ -1,3 +1,10 @@
+## [1.2.3](https://github.com/adriantoral/ingenieria-datos-viabi/compare/v1.2.2...v1.2.3) (2025-03-05)
+
+
+### Bug Fixes
+
+* actualiza las credenciales de acceso ([ad94932](https://github.com/adriantoral/ingenieria-datos-viabi/commit/ad94932d035e94baef203146e9a0f1fc5abfda40))
+
 ## [1.2.2](https://github.com/adriantoral/ingenieria-datos-viabi/compare/v1.2.1...v1.2.2) (2025-02-26)
 
 
