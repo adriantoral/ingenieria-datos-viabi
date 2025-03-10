@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/adriantoral/ingenieria-datos-viabi/compare/v1.2.4...v1.3.0) (2025-03-10)
+
+
+### Features
+
+* agrega producer en local sin kubernetes ([9404c91](https://github.com/adriantoral/ingenieria-datos-viabi/commit/9404c91b0490dd65013850d169975840198a8233))
+
 ## [1.2.4](https://github.com/adriantoral/ingenieria-datos-viabi/compare/v1.2.3...v1.2.4) (2025-03-05)
 
 
