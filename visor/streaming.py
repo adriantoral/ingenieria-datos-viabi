@@ -11,14 +11,8 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'clave_secreta'
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 
-# Buffer para almacenar frames recientes (30 segundos a ~20 FPS)
-MAX_FPS = 20
-MAX_SECONDS = 30
-BUFFER_SIZE = MAX_FPS * MAX_SECONDS
-frame_buffer = deque(maxlen=BUFFER_SIZE)
-
-rewind_mode = False
-rewind_index = 0
+# Buffer circular para almacenar los últimos frames (10 segundos a 20 fps = 200 frames)
+frame_buffer = deque(maxlen=200)
 
 @app.route('/')
 def index():
@@ -26,50 +20,39 @@ def index():
 
 @socketio.on('start_stream')
 def start_stream():
-    global rewind_mode, rewind_index
-    cap = cv2.VideoCapture(1)
+    cap = cv2.VideoCapture(1)  # Cámara. Cambia el índice si no funciona.
 
-    if not cap.isOpened():
-        print("❌ No se pudo abrir la cámara.")
-        return
+    try:
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                break
 
-    while True:
-        ret, frame = cap.read()
-        if not ret:
-            print("❌ No se pudo capturar el frame.")
-            break
+            _, buffer = cv2.imencode('.jpg', frame)
+            frame_base64 = base64.b64encode(buffer).decode('utf-8')
 
-        _, buffer = cv2.imencode('.jpg', frame)
-        frame_bytes = buffer.tobytes()
-        frame_buffer.append(frame_bytes)
+            # Guardamos el frame en el buffer
+            frame_buffer.append(frame_base64)
 
-        if not rewind_mode:
-            frame_base64 = base64.b64encode(frame_bytes).decode('utf-8')
+            # Enviamos el frame en vivo
             emit('image', {'image': frame_base64})
-        else:
-            if rewind_index < len(frame_buffer):
-                rewind_frame = frame_buffer[-rewind_index - 1]
-                frame_base64 = base64.b64encode(rewind_frame).decode('utf-8')
-                emit('image', {'image': frame_base64})
-                rewind_index += 1
-                if rewind_index >= len(frame_buffer):
-                    rewind_mode = False
-                    rewind_index = 0
 
-        socketio.sleep(1.0 / MAX_FPS)
-
-    cap.release()
+            socketio.sleep(0.05)
+    finally:
+        cap.release()
 
 @socketio.on('rewind')
-def handle_rewind(data):
-    global rewind_mode, rewind_index
-    seconds = data.get('seconds', 5)
-    frames_to_rewind = min(seconds * MAX_FPS, len(frame_buffer))
-    if frames_to_rewind > 0:
-        rewind_mode = True
-        rewind_index = frames_to_rewind
-    else:
-        emit('error', {'message': 'No hay suficientes frames para retroceder.'})
+def handle_rewind(seconds):
+    # Calculamos cuántos frames equivale ese tiempo (asumimos 20 fps)
+    fps = 20
+    frames_to_send = int(fps * seconds)
+    frames = list(frame_buffer)[-frames_to_send:]
+
+    for frame_base64 in frames:
+        emit('image', {'image': frame_base64})
+        socketio.sleep(0.05)  # Imitamos tiempo real
+
+    # Vuelve al tiempo real automáticamente
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000)
