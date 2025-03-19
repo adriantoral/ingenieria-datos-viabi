@@ -4,18 +4,19 @@ import cv2
 import base64
 import eventlet
 
-
 eventlet.monkey_patch()  # Permite que SocketIO funcione con Flask
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'clave_secreta'
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 
-
 @app.route('/')
 def index():
     return render_template('index.html')
 
+@app.route('/segundo_visores')
+def segundo_visores():
+    return render_template('segundo_visores.html')
 
 @socketio.on('start_stream')
 def start_stream():
@@ -35,7 +36,6 @@ def start_stream():
         socketio.sleep(0.05)  # Para evitar saturar la red
 
     cap.release()
-
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000)
