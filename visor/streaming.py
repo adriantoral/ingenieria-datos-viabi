@@ -1,31 +1,75 @@
-from flask import Flask, render_template, Response
 import cv2
+import base64
+import threading
+import time
+from flask import Flask, render_template
+from flask_socketio import SocketIO, emit
 
 app = Flask(__name__)
+socketio = SocketIO(app, cors_allowed_origins="*")
 
-# ⚠️ CAMBIA ESTO:  IP de EpocCam si es una cámara IP
-video_source = "http://10.1.200.138:4747/stream"
-cap = cv2.VideoCapture(0)
+# IP y puerto de EpocCam (ajusta si es necesario)
+VIDEO_SOURCE = "http://192.168.21.28:4747/video"
+cap = cv2.VideoCapture(VIDEO_SOURCE)
+
+frame_buffer = []  # Buffer de frames (timestamp, frame)
+BUFFER_SECONDS = 30  # Segundos a mantener en buffer
+FPS = 10  # Estimado de frames por segundo
+MAX_FRAMES = BUFFER_SECONDS * FPS
+
+lock = threading.Lock()
 
 
-def generar_frames():
+def stream_frames():
     while True:
         success, frame = cap.read()
         if not success:
-            break
-        else:
-            _, buffer = cv2.imencode('.jpg', frame)
-            frame = buffer.tobytes()
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+            continue
+
+        _, buffer = cv2.imencode('.jpg', frame)
+        frame_bytes = base64.b64encode(buffer).decode('utf-8')
+
+        with lock:
+            timestamp = time.time()
+            frame_buffer.append((timestamp, frame_bytes))
+            if len(frame_buffer) > MAX_FRAMES:
+                frame_buffer.pop(0)
+
+        socketio.emit('image', {'image': frame_bytes})
+        time.sleep(1 / FPS)
+
+
+@socketio.on('connect')
+def handle_connect():
+    print("✅ Cliente conectado")
+
+
+@socketio.on('rewind')
+def handle_rewind(data):
+    seconds = data.get('seconds', 5)
+    now = time.time()
+    frames_to_send = []
+
+    with lock:
+        for ts, frame in reversed(frame_buffer):
+            if now - ts <= seconds:
+                frames_to_send.insert(0, frame)
+            else:
+                break
+
+    for frame in frames_to_send:
+        socketio.emit('image', {'image': frame})
+        time.sleep(1 / FPS)
+
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
-@app.route('/video_feed')
-def video_feed():
-    return Response(generar_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+if __name__ == '__main__':
+    t = threading.Thread(target=stream_frames)
+    t.daemon = True
+    t.start()
+
+    socketio.run(app, host='0.0.0.0', port=5000)
