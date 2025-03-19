@@ -4,6 +4,7 @@ import cv2
 app = Flask(__name__)
 
 # ⚠️ CAMBIA ESTO:  IP de EpocCam si es una cámara IP
+video_source = "http://10.1.200.138:4747/stream"
 cap = cv2.VideoCapture(0)
 
 

@@ -1,17 +1,50 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visor en Tiempo Real</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Visor de Cámara de Vigilancia</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: white;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .card {
+            background-color: #2a2a2a;
+            border: none;
+            border-radius: 10px;
+        }
+        img {
+            border-radius: 10px;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>📹 Visor en Tiempo Real</h1>
-        <div class="video-wrapper">
-            <img src="{{ url_for('video_feed') }}" alt="Stream en vivo">
+    <div class="container text-center">
+        <div class="card p-4">
+            <h1 class="mb-4">🎥 Visor de Cámara de Vigilancia</h1>
+            <img id="videoStream" width="640" height="480" alt="Esperando transmisión..." class="img-fluid">
         </div>
     </div>
+
+    <!-- Importar Socket.IO -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
+    <script>
+        const socket = io();
+        socket.emit('start_stream');
+
+        socket.on('image', (data) => {
+            const imgElement = document.getElementById('videoStream');
+            imgElement.src = 'data:image/jpeg;base64,' + data.image;
+        });
+    </script>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
