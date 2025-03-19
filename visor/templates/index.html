@@ -1,51 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Visor de Cámara de Vigilancia</title>
-  <!-- Tailwind CSS v4 (ajusta la versión si fuera necesario) -->
-  <link
-    href="https://cdn.jsdelivr.net/npm/tailwindcss@4.0.0/dist/tailwind.min.css"
-    rel="stylesheet"
-  />
-
-  <style>
-    /* Puedes añadir estilos adicionales aquí, si lo requieres */
-    /* Ejemplo de text-shadow en Tailwind (no existe por defecto) */
-    .text-shadow {
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visor de Cámara de Vigilancia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gradient-to-br from-gray-900 to-black text-gray-100 min-h-screen flex flex-col justify-center items-center">
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen">
 
-  <div class="w-full max-w-2xl p-4">
-    <!-- Tarjeta principal -->
-    <div class="bg-gray-800 rounded-xl shadow-lg p-6 text-center">
-      <h1 class="text-3xl font-bold mb-4 text-shadow">Visor de Cámara de Vigilancia</h1>
-      <img
-        id="videoStream"
-        width="640"
-        height="480"
-        alt="Esperando transmisión..."
-        class="mx-auto rounded-lg max-w-full h-auto"
-      />
+    <div class="bg-gray-800 p-8 rounded-lg shadow-lg max-w-3xl w-full text-center">
+        <h1 class="text-2xl font-semibold text-blue-400 mb-6">Visor de Cámara de Vigilancia</h1>
+        <img id="videoStream" alt="Esperando transmisión..." class="rounded-md border-2 border-blue-500 mx-auto max-w-full h-auto">
     </div>
-    <!-- Texto al pie -->
-    <p class="mt-4 text-center text-sm text-gray-400">Desarrollado con Socket.IO y Tailwind 4</p>
-  </div>
 
-  <!-- Importar Socket.IO -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
-  <script>
-    const socket = io();
-    socket.emit('start_stream');
+    <!-- Socket.IO -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
+    <script>
+        const socket = io();
+        socket.emit('start_stream');
 
-    socket.on('image', (data) => {
-      const imgElement = document.getElementById('videoStream');
-      imgElement.src = 'data:image/jpeg;base64,' + data.image;
-    });
-  </script>
+        socket.on('image', (data) => {
+            const imgElement = document.getElementById('videoStream');
+            imgElement.src = 'data:image/jpeg;base64,' + data.image;
+        });
+    </script>
 </body>
 </html>
