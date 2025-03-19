@@ -1,36 +1,36 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Visor de Cámara de Vigilancia</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center">
-    <div class="max-w-4xl w-full p-6 bg-gray-800 rounded-lg shadow-lg text-center">
-        <h1 class="text-2xl font-semibold mb-4">Visor de Cámara de Vigilancia</h1>
-        <img id="videoStream" alt="Esperando transmisión..." class="rounded-lg w-full h-auto mb-4 border-4 border-blue-500 shadow-md">
-        <div class="flex justify-center gap-4">
-            <button id="rewind5" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg">Retroceder 5s</button>
-            <button id="rewind10" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg">Retroceder 10s</button>
-        </div>
+<body class="bg-gray-900 text-white flex flex-col items-center justify-center min-h-screen">
+
+    <h1 class="text-3xl font-bold mb-6">Visor de Cámara de Vigilancia</h1>
+
+    <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+        <img id="videoStream" width="640" height="480" alt="Esperando transmisión..." class="rounded-lg shadow-md"/>
     </div>
 
-    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+    <button id="rewindBtn" class="mt-6 px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-semibold transition">
+        Retroceder 5 segundos
+    </button>
+
+    <!-- Socket.IO -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
     <script>
         const socket = io();
-        const imgElement = document.getElementById('videoStream');
+        socket.emit('start_stream');
 
+        const video = document.getElementById('videoStream');
         socket.on('image', (data) => {
-            imgElement.src = 'data:image/jpeg;base64,' + data.image;
+            video.src = 'data:image/jpeg;base64,' + data.image;
         });
 
-        document.getElementById('rewind5').addEventListener('click', () => {
-            socket.emit('rewind', { seconds: 5 });
-        });
-
-        document.getElementById('rewind10').addEventListener('click', () => {
-            socket.emit('rewind', { seconds: 10 });
+        document.getElementById('rewindBtn').addEventListener('click', () => {
+            socket.emit('rewind', 5);  // Retrocede 5 segundos
         });
     </script>
 </body>
