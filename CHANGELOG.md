@@ -1,3 +1,10 @@
+## [1.5.1](https://github.com/adriantoral/ingenieria-datos-viabi/compare/v1.5.0...v1.5.1) (2025-03-26)
+
+
+### Bug Fixes
+
+* arregla un error en las variables de entorno ([0c3f7e2](https://github.com/adriantoral/ingenieria-datos-viabi/commit/0c3f7e254071c41325a6cf75299b97d50a69d8ee))
+
 # [1.5.0](https://github.com/adriantoral/ingenieria-datos-viabi/compare/v1.4.0...v1.5.0) (2025-03-26)
 
 
