@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/adriantoral/ingenieria-datos-viabi/compare/v1.3.0...v1.4.0) (2025-03-26)
+
+
+### Features
+
+* separa el envio de metadatos y video en dos colas distintas ([c89bd51](https://github.com/adriantoral/ingenieria-datos-viabi/commit/c89bd51b7d1cf07290231e3bd9354d33c2a7ed27))
+
 # [1.3.0](https://github.com/adriantoral/ingenieria-datos-viabi/compare/v1.2.4...v1.3.0) (2025-03-10)
 
 
