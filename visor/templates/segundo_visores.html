@@ -16,8 +16,9 @@
         </div>
 
         <div class="mt-6">
-            <input type="range" id="timeline" min="0" max="100" step="1" value="100" class="w-full">
-            <p id="timestamp" class="text-blue-400 text-sm">Timestamp: 100</p>
+            <!-- Línea de tiempo actualizada con rango de imágenes -->
+            <input type="range" id="timeline" min="0" max="999" step="1" value="999" class="w-full">
+            <p id="timestamp" class="text-blue-400 text-sm">Hora: 00:00:00</p> <!-- Aquí mostramos la hora -->
         </div>
 
         <a href="{{ url_for('index') }}">
@@ -34,18 +35,20 @@
         const timestampDisplay = document.getElementById("timestamp");
         const imgElement = document.getElementById('videoStream');
 
-        // Cargar la última imagen en vivo al entrar
-        socket.emit('get_buffered_image', { index: -1 });
+        // 🔹 Cargar la última imagen guardada al entrar
+        socket.emit('get_buffered_image', { index: 999 });
 
+        // 🔹 Cuando el usuario mueve la barra, solicita la imagen correspondiente
         timeline.addEventListener("input", function() {
             const index = timeline.value;
-            timestampDisplay.textContent = `Timestamp: ${index}`;
             socket.emit('get_buffered_image', { index: index });
         });
 
+        // 🔹 Recibir y mostrar imágenes y la hora del buffer
         socket.on('buffered_image', (data) => {
             if (data.image) {
                 imgElement.src = 'data:image/jpeg;base64,' + data.image;
+                timestampDisplay.textContent = `Hora: ${data.time}`;
             } else {
                 console.error('Error:', data.error);
             }

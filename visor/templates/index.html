@@ -15,8 +15,15 @@
             <img id="videoStream" alt="Esperando transmisión..." class="rounded-md border-2 border-blue-500 mx-auto max-w-full h-auto">
         </div>
 
+        <!-- Mostrar la hora local dentro de un recuadro -->
+        <div class="mt-4 mb-6"> <!-- Se añadió un margen inferior para separar el recuadro del botón -->
+            <div class="bg-gray-600 p-2 rounded-lg border-2 border-blue-500 inline-block"> <!-- Reducir padding y hacerlo más pequeño -->
+                <p id="currentTime" class="text-lg text-center text-white">00:00:00</p> <!-- Reducir tamaño de texto -->
+            </div>
+        </div>
+
         <a href="{{ url_for('segundo_visores') }}">
-            <button class="bg-blue-500 text-white py-2 px-6 rounded-md shadow-md hover:bg-blue-600">
+            <button class="bg-blue-500 text-white py-2 px-4 rounded-md shadow-md hover:bg-blue-600"> <!-- Reducir tamaño del botón -->
                 Ir al Visor con Línea de Tiempo
             </button>
         </a>
@@ -25,10 +32,26 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
     <script>
         const socket = io();
-        socket.emit('start_stream');
+        socket.emit('start_stream');  // Iniciar la transmisión
 
+        const imgElement = document.getElementById('videoStream');
+        const currentTimeElement = document.getElementById('currentTime');
+
+        // Función para actualizar la hora local en formato HH:mm:ss
+        function updateLocalTime() {
+            const now = new Date();  // Obtener la hora local
+            const hours = now.getHours().toString().padStart(2, '0');  // Formatear las horas
+            const minutes = now.getMinutes().toString().padStart(2, '0');  // Formatear los minutos
+            const seconds = now.getSeconds().toString().padStart(2, '0');  // Formatear los segundos
+            const timeString = `${hours}:${minutes}:${seconds}`;  // Concatenar la hora
+
+            currentTimeElement.textContent = timeString;  // Actualizar el texto
+        }
+
+        setInterval(updateLocalTime, 1000);  // Actualizar cada segundo
+
+        // Recibir las imágenes en tiempo real
         socket.on('image', (data) => {
-            const imgElement = document.getElementById('videoStream');
             imgElement.src = 'data:image/jpeg;base64,' + data.image;
         });
     </script>
