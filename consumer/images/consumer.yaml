@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: consumer-images-deployment
+  namespace: monitoring-stack
+  labels:
+    app: consumer-images-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: consumer-images-deployment
+  template:
+    metadata:
+      labels:
+        app: consumer-images-deployment
+    spec:
+      containers:
+        - name: consumer-images-deployment
+          image: adriitoral/viabi-consumer-images:latest
+          env:
+            - name: CONFIG_MINIO_URL
+              value: "minio-service.monitoring-stack.svc.cluster.local:9000"
+            - name: CONFIG_MINIO_ACCESS_KEY
+              value: "admin"
+            - name: CONFIG_MINIO_SECRET_KEY
+              value: "Admin@12345"
+            - name: CONFIG_MINIO_BUCKET
+              value: "intrusiones"
+            - name: CONFIG_RABBITMQ_URL
+              value: "rabbitmq-service.monitoring-stack.svc.cluster.local:5672"
+            - name: CONFIG_RABBITMQ_USERNAME
+              value: "admin"
+            - name: CONFIG_RABBITMQ_PASSWORD
+              value: "Admin@12345"
+            - name: CONFIG_RABBITMQ_QUEUE
+              value: "images"
