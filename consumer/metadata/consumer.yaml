@@ -1,32 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: consumer-deployment
+  name: consumer-metadata-deployment
   namespace: monitoring-stack
   labels:
-    app: consumer-deployment
+    app: consumer-metadata-deployment
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: consumer-deployment
+      app: consumer-metadata-deployment
   template:
     metadata:
       labels:
-        app: consumer-deployment
+        app: consumer-metadata-deployment
     spec:
       containers:
-        - name: consumer-deployment
-          image: adriitoral/viabi-consumer:latest
+        - name: consumer-metadata-deployment
+          image: adriitoral/viabi-consumer-metadata:latest
           env:
-            - name: CONFIG_MINIO_URL
-              value: "minio-service.monitoring-stack.svc.cluster.local:9000"
-            - name: CONFIG_MINIO_ACCESS_KEY
-              value: "admin"
-            - name: CONFIG_MINIO_SECRET_KEY
-              value: "Admin@12345"
-            - name: CONFIG_MINIO_BUCKET
-              value: "intrusiones"
             - name: CONFIG_INFLUX_URL
               value: "influxdb-service.monitoring-stack.svc.cluster.local:8086"
             - name: CONFIG_INFLUX_TOKEN
@@ -42,4 +34,4 @@ spec:
             - name: CONFIG_RABBITMQ_PASSWORD
               value: "Admin@12345"
             - name: CONFIG_RABBITMQ_QUEUE
-              value: "images"
+              value: "metadata"
