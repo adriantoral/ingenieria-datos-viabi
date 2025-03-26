@@ -1,3 +1,12 @@
+# [1.5.0](https://github.com/adriantoral/ingenieria-datos-viabi/compare/v1.4.0...v1.5.0) (2025-03-26)
+
+
+### Features
+
+* actualiza el yaml del consumer de images ([2a53726](https://github.com/adriantoral/ingenieria-datos-viabi/commit/2a53726806eaae1660799baa59d01698f06ed976))
+* actualiza el yaml del consumer de metadata ([de4f243](https://github.com/adriantoral/ingenieria-datos-viabi/commit/de4f243d080b70153730d0d452be594cb7ee5534))
+* divide consumer en dos partes minio e influx ([9e62934](https://github.com/adriantoral/ingenieria-datos-viabi/commit/9e62934d72843504eecb44edf83befdfe16f1040))
+
 # [1.4.0](https://github.com/adriantoral/ingenieria-datos-viabi/compare/v1.3.0...v1.4.0) (2025-03-26)
 
 
