@@ -17,7 +17,7 @@ CONFIG_RABBITMQ_IMG = {
 	'url'     : os.getenv( 'CONFIG_RABBITMQ_URL' ),
 	'username': os.getenv( 'CONFIG_RABBITMQ_USERNAME' ),
 	'password': os.getenv( 'CONFIG_RABBITMQ_PASSWORD' ),
-	'queue'   : os.getenv( 'CONFIG_RABBITMQ_QUEUE_IMG' )
+	'queue'   : os.getenv( 'CONFIG_RABBITMQ_QUEUE' )
 }
 
 

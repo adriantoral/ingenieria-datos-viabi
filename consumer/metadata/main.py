@@ -17,7 +17,7 @@ CONFIG_RABBITMQ_META = {
 	'url'     : os.getenv( 'CONFIG_RABBITMQ_URL' ),
 	'username': os.getenv( 'CONFIG_RABBITMQ_USERNAME' ),
 	'password': os.getenv( 'CONFIG_RABBITMQ_PASSWORD' ),
-	'queue'   : os.getenv( 'CONFIG_RABBITMQ_QUEUE_META' )
+	'queue'   : os.getenv( 'CONFIG_RABBITMQ_QUEUE' )
 }
 
 
