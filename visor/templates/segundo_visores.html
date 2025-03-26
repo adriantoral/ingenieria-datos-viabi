@@ -34,14 +34,46 @@
         const timeline = document.getElementById("timeline");
         const timestampDisplay = document.getElementById("timestamp");
         const imgElement = document.getElementById('videoStream');
+        
+        let currentIndex = 2399;  // Empezamos con la imagen más reciente
+        let isPlaying = false;    // Controla si estamos reproduciendo imágenes
+        let intervalId = null;    // Para controlar el intervalo de reproducción
 
-        // 🔹 Cargar la última imagen guardada al entrar
-        socket.emit('get_buffered_image', { index: 2399 });
+        // 🔹 Función para cargar la imagen y actualizar la hora
+        function loadImage(index) {
+            socket.emit('get_buffered_image', { index: index });
+        }
 
         // 🔹 Cuando el usuario mueve la barra, solicita la imagen correspondiente
         timeline.addEventListener("input", function() {
             const index = timeline.value;
-            socket.emit('get_buffered_image', { index: index });
+            currentIndex = index;
+            loadImage(currentIndex);  // Cargar imagen estática al detenerse
+
+            // Detener la reproducción si el usuario mueve la barra
+            clearInterval(intervalId);
+            isPlaying = false;
+        });
+
+        // 🔹 Iniciar la reproducción de imágenes hacia adelante
+        function playForward() {
+            if (currentIndex < 2399 && isPlaying) {
+                currentIndex++;  // Avanzar hacia adelante
+                loadImage(currentIndex);
+                setTimeout(playForward, 1000);  // 1 segundo de intervalo para simular la reproducción
+            }
+        }
+
+        // 🔹 Cuando el usuario comienza a mover la barra, detener la reproducción
+        timeline.addEventListener("mousedown", function() {
+            isPlaying = false;
+            clearInterval(intervalId);  // Detener la reproducción al arrastrar la barra
+        });
+
+        // 🔹 Cuando el usuario deja de mover la barra, comienza la reproducción hacia adelante
+        timeline.addEventListener("mouseup", function() {
+            isPlaying = true;
+            playForward();  // Reproducir imágenes hacia adelante
         });
 
         // 🔹 Recibir y mostrar imágenes y la hora del buffer
@@ -53,7 +85,12 @@
                 console.error('Error:', data.error);
             }
         });
+
+        // 🔹 Cargar la última imagen guardada al entrar
+        loadImage(currentIndex);
+
     </script>
 
 </body>
 </html>
+
