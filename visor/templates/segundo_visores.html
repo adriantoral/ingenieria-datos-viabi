@@ -17,7 +17,7 @@
 
         <div class="mt-6">
             <!-- Línea de tiempo actualizada con rango de imágenes -->
-            <input type="range" id="timeline" min="0" max="999" step="1" value="999" class="w-full">
+            <input type="range" id="timeline" min="0" max="2399" step="1" value="2399" class="w-full">
             <p id="timestamp" class="text-blue-400 text-sm">Hora: 00:00:00</p> <!-- Aquí mostramos la hora -->
         </div>
 
@@ -36,7 +36,7 @@
         const imgElement = document.getElementById('videoStream');
 
         // 🔹 Cargar la última imagen guardada al entrar
-        socket.emit('get_buffered_image', { index: 999 });
+        socket.emit('get_buffered_image', { index: 2399 });
 
         // 🔹 Cuando el usuario mueve la barra, solicita la imagen correspondiente
         timeline.addEventListener("input", function() {

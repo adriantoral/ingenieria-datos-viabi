@@ -12,9 +12,10 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'clave_secreta'
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 
-BUFFER_SIZE = 1000
-image_buffer = deque(maxlen=BUFFER_SIZE)  # Para almacenar imágenes
-time_buffer = deque(maxlen=BUFFER_SIZE)   # Para almacenar las horas
+# Cambiar el tamaño del buffer para almacenar 2 minutos de imágenes
+BUFFER_SIZE = 2400  # 20 FPS * 120 segundos = 2400 imágenes para 2 minutos
+image_buffer = deque(maxlen=BUFFER_SIZE)
+time_buffer = deque(maxlen=BUFFER_SIZE)
 
 latest_image = None  # Última imagen en vivo
 latest_time = None   # Última hora de la imagen en vivo
@@ -40,7 +41,7 @@ def start_stream():
         # Codificar la imagen a base64
         _, buffer = cv2.imencode('.jpg', frame)
         frame_base64 = base64.b64encode(buffer).decode('utf-8')
-        
+
         # Obtener la hora actual
         current_time = datetime.now().strftime("%H:%M:%S")
 
