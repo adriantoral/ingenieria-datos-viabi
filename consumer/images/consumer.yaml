@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: consumer-deployment
+  name: consumer-images-deployment
   namespace: monitoring-stack
   labels:
-    app: consumer-deployment
+    app: consumer-images-deployment
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: consumer-deployment
+      app: consumer-images-deployment
   template:
     metadata:
       labels:
-        app: consumer-deployment
+        app: consumer-images-deployment
     spec:
       containers:
-        - name: consumer-deployment
-          image: adriitoral/viabi-consumer:latest
+        - name: consumer-images-deployment
+          image: adriitoral/viabi-consumer-images:latest
           env:
             - name: CONFIG_MINIO_URL
               value: "minio-service.monitoring-stack.svc.cluster.local:9000"
@@ -26,14 +26,6 @@ spec:
             - name: CONFIG_MINIO_SECRET_KEY
               value: "Admin@12345"
             - name: CONFIG_MINIO_BUCKET
-              value: "intrusiones"
-            - name: CONFIG_INFLUX_URL
-              value: "influxdb-service.monitoring-stack.svc.cluster.local:8086"
-            - name: CONFIG_INFLUX_TOKEN
-              value: 'Bg1W8hRrlLW0lsngsHnXQ6KJH-TPdVOP5DpTWSBkGxBxIULGLv_GA157NwdSjmxJ8E-8_2YZ4yvuFcZfnt_mJw=='
-            - name: CONFIG_INFLUX_ORG
-              value: "miorganizacion"
-            - name: CONFIG_INFLUX_BUCKET
               value: "intrusiones"
             - name: CONFIG_RABBITMQ_URL
               value: "rabbitmq-service.monitoring-stack.svc.cluster.local:5672"
