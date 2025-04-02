@@ -59,8 +59,9 @@
         function playForward() {
             if (currentIndex < 2399 && isPlaying) {
                 currentIndex++;  // Avanzar hacia adelante
+                timeline.value = currentIndex; 
                 loadImage(currentIndex);
-                setTimeout(playForward, 100);  // 1 segundo de intervalo para simular la reproducción
+                setTimeout(playForward, 60);  // 1 segundo de intervalo para simular la reproducción
             }
         }
 
