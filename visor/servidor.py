@@ -1,11 +1,12 @@
-from flask import Flask, render_template
+import eventlet
+eventlet.monkey_patch()
+
+from flask import Flask, render_template, url_for, send_from_directory
 from flask_socketio import SocketIO, emit
 import cv2
 import base64
-import eventlet
 from collections import deque
-
-eventlet.monkey_patch()
+import os
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'clave_secreta'
@@ -24,6 +25,28 @@ def index():
 @app.route('/segundo_visores')
 def segundo_visores():
     return render_template('segundo_visores.html')
+
+@app.route('/tercer_visores')
+def tercer_visores():
+    frames_folder = os.path.join(os.getcwd(), 'Frames')
+    print("Directorio Frames encontrado en:", frames_folder)  # Depuración
+    print("Contenido del directorio Frames:", os.listdir(frames_folder))  # Depuración
+
+    images = []
+    for filename in os.listdir(frames_folder):
+        if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.gif')):
+            images.append(filename)
+    
+    images.sort(key=lambda x: int(''.join(filter(str.isdigit, x))))
+    images_urls = [url_for('get_frame', filename=img) for img in images]
+
+    print("URLs generadas:", images_urls)  # Depuración
+    return render_template('tercer_visores.html', images=images_urls)
+
+@app.route('/frames/<path:filename>')
+def get_frame(filename):
+    # Envía el archivo desde la carpeta "frames"
+    return send_from_directory("Frames", filename)
 
 @socketio.on('start_stream')
 def start_stream():
