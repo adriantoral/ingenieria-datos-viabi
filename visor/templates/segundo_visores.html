@@ -16,9 +16,8 @@
         </div>
 
         <div class="mt-6">
-            <!-- Línea de tiempo actualizada con rango de imágenes -->
             <input type="range" id="timeline" min="0" max="2399" step="1" value="2399" class="w-full">
-            <p id="timestamp" class="text-blue-400 text-sm">Hora: 00:00:00</p> <!-- Aquí mostramos la hora -->
+            <p id="timestamp" class="text-blue-400 text-sm">Hora: 00:00:00</p>
         </div>
 
         <a href="{{ url_for('index') }}">
@@ -35,63 +34,81 @@
         const timestampDisplay = document.getElementById("timestamp");
         const imgElement = document.getElementById('videoStream');
         
-        let currentIndex = 2399;  // Empezamos con la imagen más reciente
-        let isPlaying = false;    // Controla si estamos reproduciendo imágenes
-        let intervalId = null;    // Para controlar el intervalo de reproducción
+        let currentIndex = 2399;
+        let bufferSize = 0;
+        let isPlaying = false;
+        let intervalId = null;  // Controlar el intervalo de reproducción
+        let lastLoadedImage = null;  // Almacenar la última imagen cargada
 
-        // Función para cargar la imagen y actualizar la hora
+        // Cargar la imagen según el índice
         function loadImage(index) {
             socket.emit('get_buffered_image', { index: index });
         }
 
-        // Cuando el usuario mueve la barra, solicita la imagen correspondiente
-        timeline.addEventListener("input", function() {
-            const index = timeline.value;
-            currentIndex = index;
-            loadImage(currentIndex);  // Cargar imagen estática al detenerse
+        // Obtener el tamaño del buffer al iniciar
+        function updateBufferSize() {
+            socket.emit('get_buffer_size');
+        }
 
-            // Detener la reproducción si el usuario mueve la barra
-            clearInterval(intervalId);
-            isPlaying = false;
+        socket.on('buffer_size', (data) => {
+            bufferSize = data.size;
+            timeline.max = bufferSize - 1;
+            if (bufferSize > 0 && !lastLoadedImage) {
+                timeline.value = bufferSize - 1;
+                loadImage(bufferSize - 1);  // Cargar la imagen más reciente cuando se inicia
+            }
         });
 
-        // Iniciar la reproducción de imágenes hacia adelante
+        // Función para manejar la reproducción hacia adelante
         function playForward() {
-            if (currentIndex < 2399 && isPlaying) {
+            if (currentIndex < bufferSize - 1 && isPlaying) {
                 currentIndex++;  // Avanzar hacia adelante
                 timeline.value = currentIndex; 
                 loadImage(currentIndex);
+
                 setTimeout(playForward, 60);  // 1 segundo de intervalo para simular la reproducción
             }
         }
 
-        // Cuando el usuario comienza a mover la barra, detener la reproducción
-        timeline.addEventListener("mousedown", function() {
+        // Cuando el usuario mueve la barra
+        timeline.addEventListener("input", function() {
+            currentIndex = timeline.value;
+            loadImage(currentIndex);
+
+            // Detener la reproducción si el usuario mueve la barra
             isPlaying = false;
-            clearInterval(intervalId);  // Detener la reproducción al arrastrar la barra
+            clearInterval(intervalId);
         });
 
-        // Cuando el usuario deja de mover la barra, comienza la reproducción hacia adelante
-        timeline.addEventListener("mouseup", function() {
-            isPlaying = true;
-            playForward();  // Reproducir imágenes hacia adelante
-        });
-
-        // Recibir y mostrar imágenes y la hora del buffer
+        // Recibir y mostrar las imágenes del buffer
         socket.on('buffered_image', (data) => {
             if (data.image) {
-                imgElement.src = 'data:image/jpeg;base64,' + data.image;
-                timestampDisplay.textContent = `Hora: ${data.time}`;
-            } else {
-                console.error('Error:', data.error);
+                // Solo actualizamos la imagen si es diferente a la última cargada
+                if (data.image !== lastLoadedImage) {
+                    imgElement.src = 'data:image/jpeg;base64,' + data.image;
+                    timestampDisplay.textContent = `Hora: ${data.time}`;
+                    lastLoadedImage = data.image;  // Guardamos la última imagen cargada
+                }
             }
         });
 
-        // Cargar la última imagen guardada al entrar
-        loadImage(currentIndex);
+        // Iniciar la reproducción cuando se presiona la barra de reproducción
+        timeline.addEventListener("mousedown", function() {
+            isPlaying = false;
+            clearInterval(intervalId);  // Detener la reproducción cuando se mueve la barra
+        });
+
+        // Reanudar la reproducción al soltar la barra
+        timeline.addEventListener("mouseup", function() {
+            isPlaying = true;
+            playForward();  // Iniciar la reproducción hacia adelante
+        });
+
+        // Inicializar tamaño de buffer
+        updateBufferSize();
+        setInterval(updateBufferSize, 5000);  // Mantener actualizado el tamaño del buffer cada 5 segundos
 
     </script>
 
 </body>
 </html>
-
