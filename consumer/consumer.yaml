@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: consumer-deployment
-          image: adriitoral/viabi-consumer:latest
+          image: nilerdar/viabi-consumer:latest
           env:
             - name: CONFIG_MINIO_URL
               value: "minio-service.monitoring-stack.svc.cluster.local:9000"
