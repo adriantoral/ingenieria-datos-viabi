@@ -10,5 +10,77 @@ spec:
     additionalConfig: |
       default_user = admin
       default_pass = Admin@12345
+  persistence:
+    storageClassName: standard
+    storage: 1Gi
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
   service:
     type: NodePort
+    annotations:
+      service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: keda-rabbitmq-credentials
+  namespace: monitoring-stack
+stringData:
+  rabbitmq_host: "rabbitmq-service.monitoring-stack.svc.cluster.local"
+  rabbitmq_port: "5672"
+  rabbitmq_username: "admin"
+  rabbitmq_password: "Admin@12345"
+
+---
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: keda-rabbitmq-auth
+  namespace: monitoring-stack
+spec:
+  secretTargetRef:
+    - parameter: host
+      name: keda-rabbitmq-credentials
+      key: rabbitmq_host
+    - parameter: port
+      name: keda-rabbitmq-credentials
+      key: rabbitmq_port
+    - parameter: username
+      name: keda-rabbitmq-credentials
+      key: rabbitmq_username
+    - parameter: password
+      name: keda-rabbitmq-credentials
+      key: rabbitmq_password
+
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: rabbitmq-service-scaler
+  namespace: monitoring-stack
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: StatefulSet
+    name: rabbitmq-service-server
+
+  minReplicaCount: 3
+  maxReplicaCount: 10
+
+  pollingInterval: 30
+  cooldownPeriod: 120
+
+  triggers:
+    - type: rabbitmq
+      metadata:
+        queueName: "images"
+        mode: QueueLength
+        value: "50"
+      authenticationRef:
+        name: keda-rabbitmq-auth
