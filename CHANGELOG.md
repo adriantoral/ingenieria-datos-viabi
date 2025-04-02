@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/adriantoral/ingenieria-datos-viabi/compare/v1.6.0...v1.7.0) (2025-04-02)
+
+
+### Features
+
+* agrega autoescalado completo de MinIO, InfluxDB, RabbitMQ, consumer y persistencia de token ([d99b31f](https://github.com/adriantoral/ingenieria-datos-viabi/commit/d99b31f5bb379324d8a7b5b119695626bd3c2b90))
+
 # [1.6.0](https://github.com/adriantoral/ingenieria-datos-viabi/compare/v1.5.1...v1.6.0) (2025-04-02)
 
 
