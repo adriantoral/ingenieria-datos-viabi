@@ -39,12 +39,12 @@
         let isPlaying = false;    // Controla si estamos reproduciendo imágenes
         let intervalId = null;    // Para controlar el intervalo de reproducción
 
-        // 🔹 Función para cargar la imagen y actualizar la hora
+        // Función para cargar la imagen y actualizar la hora
         function loadImage(index) {
             socket.emit('get_buffered_image', { index: index });
         }
 
-        // 🔹 Cuando el usuario mueve la barra, solicita la imagen correspondiente
+        // Cuando el usuario mueve la barra, solicita la imagen correspondiente
         timeline.addEventListener("input", function() {
             const index = timeline.value;
             currentIndex = index;
@@ -55,28 +55,28 @@
             isPlaying = false;
         });
 
-        // 🔹 Iniciar la reproducción de imágenes hacia adelante
+        // Iniciar la reproducción de imágenes hacia adelante
         function playForward() {
             if (currentIndex < 2399 && isPlaying) {
                 currentIndex++;  // Avanzar hacia adelante
                 loadImage(currentIndex);
-                setTimeout(playForward, 50);  // 1 segundo de intervalo para simular la reproducción
+                setTimeout(playForward, 100);  // 1 segundo de intervalo para simular la reproducción
             }
         }
 
-        // 🔹 Cuando el usuario comienza a mover la barra, detener la reproducción
+        // Cuando el usuario comienza a mover la barra, detener la reproducción
         timeline.addEventListener("mousedown", function() {
             isPlaying = false;
             clearInterval(intervalId);  // Detener la reproducción al arrastrar la barra
         });
 
-        // 🔹 Cuando el usuario deja de mover la barra, comienza la reproducción hacia adelante
+        // Cuando el usuario deja de mover la barra, comienza la reproducción hacia adelante
         timeline.addEventListener("mouseup", function() {
             isPlaying = true;
             playForward();  // Reproducir imágenes hacia adelante
         });
 
-        // 🔹 Recibir y mostrar imágenes y la hora del buffer
+        // Recibir y mostrar imágenes y la hora del buffer
         socket.on('buffered_image', (data) => {
             if (data.image) {
                 imgElement.src = 'data:image/jpeg;base64,' + data.image;
@@ -86,7 +86,7 @@
             }
         });
 
-        // 🔹 Cargar la última imagen guardada al entrar
+        // Cargar la última imagen guardada al entrar
         loadImage(currentIndex);
 
     </script>
