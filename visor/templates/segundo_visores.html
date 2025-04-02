@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visor con Línea de Tiempo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen">
+
+    <div class="bg-gray-800 p-8 rounded-lg shadow-lg max-w-3xl w-full text-center">
+        <h1 class="text-2xl font-semibold text-blue-400 mb-6">Visor con Línea de Tiempo</h1>
+        
+        <div class="bg-gray-700 p-4 rounded-lg shadow-md mb-6">
+            <img id="videoStream" alt="Cargando imagen..." class="rounded-md border-2 border-blue-500 mx-auto max-w-full h-auto">
+        </div>
+
+        <div class="mt-6">
+            <!-- Línea de tiempo actualizada con rango de imágenes -->
+            <input type="range" id="timeline" min="0" max="2399" step="1" value="2399" class="w-full">
+            <p id="timestamp" class="text-blue-400 text-sm">Hora: 00:00:00</p> <!-- Aquí mostramos la hora -->
+        </div>
+
+        <a href="{{ url_for('index') }}">
+            <button class="bg-blue-500 text-white py-2 px-6 rounded-md shadow-md hover:bg-blue-600">
+                Volver al Visor en Tiempo Real
+            </button>
+        </a>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
+    <script>
+        const socket = io();
+        const timeline = document.getElementById("timeline");
+        const timestampDisplay = document.getElementById("timestamp");
+        const imgElement = document.getElementById('videoStream');
+        
+        let currentIndex = 2399;  // Empezamos con la imagen más reciente
+        let isPlaying = false;    // Controla si estamos reproduciendo imágenes
+        let intervalId = null;    // Para controlar el intervalo de reproducción
+
+        // Función para cargar la imagen y actualizar la hora
+        function loadImage(index) {
+            socket.emit('get_buffered_image', { index: index });
+        }
+
+        // Cuando el usuario mueve la barra, solicita la imagen correspondiente
+        timeline.addEventListener("input", function() {
+            const index = timeline.value;
+            currentIndex = index;
+            loadImage(currentIndex);  // Cargar imagen estática al detenerse
+
+            // Detener la reproducción si el usuario mueve la barra
+            clearInterval(intervalId);
+            isPlaying = false;
+        });
+
+        // Iniciar la reproducción de imágenes hacia adelante
+        function playForward() {
+            if (currentIndex < 2399 && isPlaying) {
+                currentIndex++;  // Avanzar hacia adelante
+                loadImage(currentIndex);
+                setTimeout(playForward, 100);  // 1 segundo de intervalo para simular la reproducción
+            }
+        }
+
+        // Cuando el usuario comienza a mover la barra, detener la reproducción
+        timeline.addEventListener("mousedown", function() {
+            isPlaying = false;
+            clearInterval(intervalId);  // Detener la reproducción al arrastrar la barra
+        });
+
+        // Cuando el usuario deja de mover la barra, comienza la reproducción hacia adelante
+        timeline.addEventListener("mouseup", function() {
+            isPlaying = true;
+            playForward();  // Reproducir imágenes hacia adelante
+        });
+
+        // Recibir y mostrar imágenes y la hora del buffer
+        socket.on('buffered_image', (data) => {
+            if (data.image) {
+                imgElement.src = 'data:image/jpeg;base64,' + data.image;
+                timestampDisplay.textContent = `Hora: ${data.time}`;
+            } else {
+                console.error('Error:', data.error);
+            }
+        });
+
+        // Cargar la última imagen guardada al entrar
+        loadImage(currentIndex);
+
+    </script>
+
+</body>
+</html>
+
