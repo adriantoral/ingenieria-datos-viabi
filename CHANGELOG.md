@@ -1,3 +1,16 @@
+# [1.6.0](https://github.com/adriantoral/ingenieria-datos-viabi/compare/v1.5.1...v1.6.0) (2025-04-02)
+
+
+### Features
+
+* + de 2 minutos guardados ([ad380f1](https://github.com/adriantoral/ingenieria-datos-viabi/commit/ad380f17d503903856c16ee56e914f279e3045ad))
+* Buffer implementado ([260ad0a](https://github.com/adriantoral/ingenieria-datos-viabi/commit/260ad0aeffe75952bfa14496a25ddeaac155edb5))
+* Cambio de tiempo va mas rapido ([db80d24](https://github.com/adriantoral/ingenieria-datos-viabi/commit/db80d24811e50b876482ff2b0d9d75d854da4788))
+* cambios pequeños ([a92ac74](https://github.com/adriantoral/ingenieria-datos-viabi/commit/a92ac749199ddd007ca741c664f2aad4639fcab9))
+* Hora en la camaras ([145f92f](https://github.com/adriantoral/ingenieria-datos-viabi/commit/145f92f087c1e1b8cc115674689fd4930ad2551c))
+* Se muestra el video ([44104d6](https://github.com/adriantoral/ingenieria-datos-viabi/commit/44104d63bf483c9cad0428562b74e113fd06fb67))
+* Visor a Develop ([1a418c1](https://github.com/adriantoral/ingenieria-datos-viabi/commit/1a418c10614cce632b875354557469c6e9110f88))
+
 ## [1.5.1](https://github.com/adriantoral/ingenieria-datos-viabi/compare/v1.5.0...v1.5.1) (2025-03-26)
 
 
