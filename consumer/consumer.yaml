@@ -30,7 +30,7 @@ spec:
             - name: CONFIG_INFLUX_URL
               value: "influxdb-service.monitoring-stack.svc.cluster.local:8086"
             - name: CONFIG_INFLUX_TOKEN
-              value: 'Bg1W8hRrlLW0lsngsHnXQ6KJH-TPdVOP5DpTWSBkGxBxIULGLv_GA157NwdSjmxJ8E-8_2YZ4yvuFcZfnt_mJw=='
+              value: "MiTokenPersonalizado123456789"
             - name: CONFIG_INFLUX_ORG
               value: "miorganizacion"
             - name: CONFIG_INFLUX_BUCKET
@@ -43,3 +43,24 @@ spec:
               value: "Admin@12345"
             - name: CONFIG_RABBITMQ_QUEUE
               value: "images"
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: consumer-hpa
+  namespace: monitoring-stack
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: consumer-deployment
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 75

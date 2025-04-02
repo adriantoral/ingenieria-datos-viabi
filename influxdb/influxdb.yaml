@@ -1,4 +1,17 @@
 apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: influxdb-pvc
+  namespace: monitoring-stack
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+
+---
+apiVersion: v1
 kind: Service
 metadata:
   name: influxdb-service
@@ -32,12 +45,11 @@ spec:
     spec:
       containers:
         - name: influxdb-deployment
-          image: influxdb:2.7.1  # Puedes cambiar a la versión que prefieras
+          image: influxdb:2.7.1
           ports:
             - containerPort: 8086
               name: api
           env:
-            # Estos parámetros inician el setup automático si la base de datos aún no se ha inicializado
             - name: DOCKER_INFLUXDB_INIT_MODE
               value: "setup"
             - name: DOCKER_INFLUXDB_INIT_USERNAME
@@ -48,9 +60,14 @@ spec:
               value: "miorganizacion"
             - name: DOCKER_INFLUXDB_INIT_BUCKET
               value: "mibucket"
+            - name: DOCKER_INFLUXDB_INIT_RETENTION
+              value: "30d"
+            - name: DOCKER_INFLUXDB_INIT_ADMIN_TOKEN
+              value: "MiTokenPersonalizado123456789"
           volumeMounts:
             - name: influxdb-storage
               mountPath: /var/lib/influxdb2
       volumes:
         - name: influxdb-storage
-          emptyDir: { }  # Para entornos de pruebas; en producción usa un PVC para persistencia
+          persistentVolumeClaim:
+            claimName: influxdb-pvc
