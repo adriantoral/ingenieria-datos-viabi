@@ -7,6 +7,9 @@ import cv2
 import base64
 from collections import deque
 import os
+import random
+from influxdb_client import InfluxDBClient, Point
+from influxdb_client.client.write_api import SYNCHRONOUS
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'clave_secreta'
@@ -15,6 +18,23 @@ socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 BUFFER_SIZE = 10000
 image_buffer = deque(maxlen=BUFFER_SIZE)
 latest_image = None  # Última imagen en vivo
+
+# Configuración de InfluxDB
+CONFIG_INFLUX = {
+    'url'   : os.getenv( 'CONFIG_INFLUX_URL' ),
+	'token' : os.getenv( 'CONFIG_INFLUX_TOKEN' ),
+	'org'   : os.getenv( 'CONFIG_INFLUX_ORG' )
+}
+
+# Cliente de InfluxDB
+client = InfluxDBClient(
+    url=CONFIG_INFLUX["url"],
+    token=CONFIG_INFLUX["token"],
+    org=CONFIG_INFLUX["org"]
+)
+
+query_api = client.query_api()
+bucket = os.getenv("CONFIG_INFLUX_BUCKET")
 
 @app.route('/')
 def index():
@@ -26,27 +46,65 @@ def index():
 def segundo_visores():
     return render_template('segundo_visores.html')
 
+def get_recent_intrusions():
+    """Devuelve lista de (timestamp, image_url) para intrusiones recientes (prob > 0.9 y flagged)"""
+    query = f'''
+    from(bucket: "{CONFIG_INFLUX['bucket']}")
+      |> range(start: -1h)
+      |> filter(fn: (r) => r._measurement == "intrusion_event")
+      |> filter(fn: (r) => r.probability >= 0.9 and r.flagged == 1)
+      |> keep(columns: ["_time", "image_url"])
+      |> sort(columns: ["_time"])
+    '''
+
+    result = query_api.query(org=CONFIG_INFLUX["org"], query=query)
+    intrusions = []
+
+    for table in result:
+        for record in table.records:
+            timestamp = record.get_time()
+            image_url = record.values.get("image_url")
+            if timestamp and image_url:
+                intrusions.append((timestamp, image_url))
+    
+    return intrusions
+
+
+def get_clip_images(event_time):
+    """Recupera todas las imágenes ±2s desde el timestamp de un evento"""
+    t0 = (event_time - timedelta(seconds=2)).isoformat()
+    t1 = (event_time + timedelta(seconds=2)).isoformat()
+
+    query = f'''
+    from(bucket: "{CONFIG_INFLUX['bucket']}")
+      |> range(start: time(v: "{t0}"), stop: time(v: "{t1}"))
+      |> filter(fn: (r) => r._measurement == "intrusion_event")
+      |> keep(columns: ["_time", "image_url"])
+      |> sort(columns: ["_time"])
+    '''
+
+    result = query_api.query(org=CONFIG_INFLUX["org"], query=query)
+    images = []
+
+    for table in result:
+        for record in table.records:
+            url = record.values.get("image_url")
+            if url:
+                images.append(url)
+    
+    return images
+
 @app.route('/tercer_visores')
 def tercer_visores():
-    frames_folder = os.path.join(os.getcwd(), 'Frames')
-    print("Directorio Frames encontrado en:", frames_folder)  # Depuración
-    print("Contenido del directorio Frames:", os.listdir(frames_folder))  # Depuración
+    intrusions = get_recent_intrusions()
+    if not intrusions:
+        return "<h3>No hay intrusiones recientes detectadas</h3>"
 
-    images = []
-    for filename in os.listdir(frames_folder):
-        if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.gif')):
-            images.append(filename)
-    
-    images.sort(key=lambda x: int(''.join(filter(str.isdigit, x))))
-    images_urls = [url_for('get_frame', filename=img) for img in images]
+    # Seleccionamos la última intrusión
+    latest_time, _ = intrusions[-1]
+    image_urls = get_clip_images(latest_time)
 
-    print("URLs generadas:", images_urls)  # Depuración
-    return render_template('tercer_visores.html', images=images_urls)
-
-@app.route('/frames/<path:filename>')
-def get_frame(filename):
-    # Envía el archivo desde la carpeta "frames"
-    return send_from_directory("Frames", filename)
+    return render_template("visor_clip.html", images=image_urls)
 
 @socketio.on('start_stream')
 def start_stream():
