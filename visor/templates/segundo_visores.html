@@ -17,11 +17,18 @@
 
         <div class="mt-6">
             <input type="range" id="timeline" min="0" max="2399" step="1" value="2399" class="w-full">
-            <p id="timestamp" class="text-blue-400 text-sm">Hora: 00:00:00</p>
+            <p id="timestamp" class="text-blue-400 text-sm mt-2">Hora: 00:00:00</p>
+
+            <!-- Aquí está el nuevo botón LIVE 🔴 -->
+            <div class="mt-4 flex justify-center">
+                <button id="liveBtn" class="text-white border border-white px-4 py-2 rounded-md text-sm font-semibold">
+                    LIVE 🔴
+                </button>
+            </div>
         </div>
 
         <a href="{{ url_for('index') }}">
-            <button class="bg-blue-500 text-white py-2 px-6 rounded-md shadow-md hover:bg-blue-600">
+            <button class="bg-blue-500 text-white py-2 px-6 rounded-md shadow-md hover:bg-blue-600 mt-6">
                 Volver al Visor en Tiempo Real
             </button>
         </a>
@@ -37,15 +44,13 @@
         let currentIndex = 2399;
         let bufferSize = 0;
         let isPlaying = false;
-        let intervalId = null;  // Controlar el intervalo de reproducción
-        let lastLoadedImage = null;  // Almacenar la última imagen cargada
+        let intervalId = null;
+        let lastLoadedImage = null;
 
-        // Cargar la imagen según el índice
         function loadImage(index) {
             socket.emit('get_buffered_image', { index: index });
         }
 
-        // Obtener el tamaño del buffer al iniciar
         function updateBufferSize() {
             socket.emit('get_buffer_size');
         }
@@ -55,59 +60,46 @@
             timeline.max = bufferSize - 1;
             if (bufferSize > 0 && !lastLoadedImage) {
                 timeline.value = bufferSize - 1;
-                loadImage(bufferSize - 1);  // Cargar la imagen más reciente cuando se inicia
+                loadImage(bufferSize - 1);
             }
         });
 
-        // Función para manejar la reproducción hacia adelante
         function playForward() {
             if (currentIndex < bufferSize - 1 && isPlaying) {
-                currentIndex++;  // Avanzar hacia adelante
+                currentIndex++;
                 timeline.value = currentIndex; 
                 loadImage(currentIndex);
-
-                setTimeout(playForward, 60);  // 1 segundo de intervalo para simular la reproducción
+                setTimeout(playForward, 60);
             }
         }
 
-        // Cuando el usuario mueve la barra
         timeline.addEventListener("input", function() {
             currentIndex = timeline.value;
             loadImage(currentIndex);
-
-            // Detener la reproducción si el usuario mueve la barra
             isPlaying = false;
             clearInterval(intervalId);
         });
 
-        // Recibir y mostrar las imágenes del buffer
         socket.on('buffered_image', (data) => {
-            if (data.image) {
-                // Solo actualizamos la imagen si es diferente a la última cargada
-                if (data.image !== lastLoadedImage) {
-                    imgElement.src = 'data:image/jpeg;base64,' + data.image;
-                    timestampDisplay.textContent = `Hora: ${data.time}`;
-                    lastLoadedImage = data.image;  // Guardamos la última imagen cargada
-                }
+            if (data.image && data.image !== lastLoadedImage) {
+                imgElement.src = 'data:image/jpeg;base64,' + data.image;
+                timestampDisplay.textContent = `Hora: ${data.time}`;
+                lastLoadedImage = data.image;
             }
         });
 
-        // Iniciar la reproducción cuando se presiona la barra de reproducción
         timeline.addEventListener("mousedown", function() {
             isPlaying = false;
-            clearInterval(intervalId);  // Detener la reproducción cuando se mueve la barra
+            clearInterval(intervalId);
         });
 
-        // Reanudar la reproducción al soltar la barra
         timeline.addEventListener("mouseup", function() {
             isPlaying = true;
-            playForward();  // Iniciar la reproducción hacia adelante
+            playForward();
         });
 
-        // Inicializar tamaño de buffer
         updateBufferSize();
-        setInterval(updateBufferSize, 5000);  // Mantener actualizado el tamaño del buffer cada 5 segundos
-
+        setInterval(updateBufferSize, 5000);
     </script>
 
 </body>

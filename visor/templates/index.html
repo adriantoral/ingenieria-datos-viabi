@@ -3,58 +3,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visor de Cámara de Vigilancia</title>
+    <title>Visor de Cámaras de Vigilancia</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .progress-bar {
+            width: 80%;
+            max-width: 400px;
+            height: 20px;
+            background-color: #333;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        .progress {
+            height: 100%;
+            background-color: #3B82F6;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
 </head>
 <body class="bg-gray-900 text-white flex items-center justify-center min-h-screen">
 
-    <div class="bg-gray-800 p-8 rounded-lg shadow-lg max-w-3xl w-full text-center">
-        <h1 class="text-2xl font-semibold text-blue-400 mb-6">Visor de Cámara de Vigilancia</h1>
-        
-        <div class="bg-gray-700 p-4 rounded-lg shadow-md mb-6">
-            <img id="videoStream" alt="Esperando transmisión..." class="rounded-md border-2 border-blue-500 mx-auto max-w-full h-auto">
+    <!-- Pantalla de carga -->
+    <div id="loadingScreen" class="loading-screen">
+        <h2 class="text-2xl font-semibold text-blue-400 mb-4">Cargando cámaras...</h2>
+        <p class="text-gray-300 mb-2" id="loadingText">Preparando buffers: 0/50</p>
+        <div class="progress-bar">
+            <div id="progressBar" class="progress"></div>
         </div>
+    </div>
 
-        <!-- Mostrar la hora local dentro de un recuadro -->
-        <div class="mt-4 mb-6"> <!-- Se añadió un margen inferior para separar el recuadro del botón -->
-            <div class="bg-gray-600 p-2 rounded-lg border-2 border-blue-500 inline-block"> <!-- Reducir padding y hacerlo más pequeño -->
-                <p id="currentTime" class="text-lg text-center text-white">00:00:00</p> <!-- Reducir tamaño de texto -->
+    <!-- Contenido principal (oculto inicialmente) -->
+    <div id="mainContent" class="hidden bg-gray-800 p-8 rounded-lg shadow-lg max-w-5xl w-full text-center">
+        <h1 class="text-2xl font-semibold text-blue-400 mb-6">Visor de Cámaras de Vigilancia</h1>
+        
+        <div class="bg-gray-700 p-4 rounded-lg shadow-md mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <p class="text-blue-400 mb-2">Cámara 1</p>
+                <img id="videoCam1" alt="Esperando transmisión..." class="rounded-md border-2 border-blue-500 mx-auto max-w-full h-auto">
+            </div>
+            <div>
+                <p class="text-green-400 mb-2">Cámara 2</p>
+                <img id="videoCam2" alt="Esperando transmisión..." class="rounded-md border-2 border-green-500 mx-auto max-w-full h-auto">
             </div>
         </div>
 
-        <a href="{{ url_for('segundo_visores') }}">
-            <button class="bg-blue-500 text-white py-2 px-4 rounded-md shadow-md hover:bg-blue-600"> <!-- Reducir tamaño del botón -->
-                Ir al Visor con Línea de Tiempo
+        <div class="mt-4 mb-6 flex items-center justify-center gap-4">
+            <button id="liveBtn" class="bg-red-600 text-white py-2 px-4 rounded-md shadow-md hover:bg-red-700 font-semibold">
+                LIVE 🔴
             </button>
-        </a>
+        </div>
+
+        <div class="mt-6">
+            <input type="range" id="timeline" min="0" max="120" value="120" class="w-full">
+            <p id="timestamp" class="text-blue-400 text-sm mt-2">Hora: 00:00:00</p>
+        </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
     <script>
         const socket = io();
-        socket.emit('start_stream');  // Iniciar la transmisión
+        
+        const imgCam1 = document.getElementById('videoCam1');
+        const imgCam2 = document.getElementById('videoCam2');
+        const timestampDisplay = document.getElementById("timestamp");
+        const timeline = document.getElementById("timeline");
+        const loadingScreen = document.getElementById("loadingScreen");
+        const mainContent = document.getElementById("mainContent");
+        const loadingText = document.getElementById("loadingText");
+        const progressBar = document.getElementById("progressBar");
+        
+        let currentRealTime = 0;
+        let isLive = true;
+        let buffersReady = false;
+        let currentBufferSize = 0;
 
-        const imgElement = document.getElementById('videoStream');
-        const currentTimeElement = document.getElementById('currentTime');
-
-        // Función para actualizar la hora local en formato HH:mm:ss
-        function updateLocalTime() {
-            const now = new Date();  // Obtener la hora local
-            const hours = now.getHours().toString().padStart(2, '0');  // Formatear las horas
-            const minutes = now.getMinutes().toString().padStart(2, '0');  // Formatear los minutos
-            const seconds = now.getSeconds().toString().padStart(2, '0');  // Formatear los segundos
-            const timeString = `${hours}:${minutes}:${seconds}`;  // Concatenar la hora
-
-            currentTimeElement.textContent = timeString;  // Actualizar el texto
+        function formatTime(totalSeconds) {
+            const date = new Date(totalSeconds * 1000);
+            return date.toISOString().substr(11, 8);
         }
 
-        setInterval(updateLocalTime, 1000);  // Actualizar cada segundo
+        function updateDisplayedTime() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const seconds = now.getSeconds();
+            currentRealTime = hours * 3600 + minutes * 60 + seconds;
+            
+            if (isLive) {
+                const displayTime = currentRealTime;
+                timestampDisplay.textContent = `Hora: ${formatTime(displayTime)}`;
+                timeline.value = 120;
+            } else {
+                const secondsFromNow = 120 - timeline.value;
+                const displayTime = currentRealTime - secondsFromNow;
+                timestampDisplay.textContent = `Hora: ${formatTime(displayTime)}`;
+            }
+        }
 
-        // Recibir las imágenes en tiempo real
-        socket.on('image', (data) => {
-            imgElement.src = 'data:image/jpeg;base64,' + data.image;
+        function checkBuffersReady() {
+            if (!buffersReady && currentBufferSize >= 50) {
+                buffersReady = true;
+                loadingScreen.classList.add('hidden');
+                mainContent.classList.remove('hidden');
+                socket.emit('start_stream');
+            }
+        }
+
+        timeline.addEventListener("input", function() {
+            isLive = false;
+            updateDisplayedTime();
         });
-    </script>
 
+        document.getElementById('liveBtn').addEventListener('click', () => {
+            isLive = true;
+            timeline.value = 120;
+            updateDisplayedTime();
+        });
+
+        socket.on('image_cam1', (data) => {
+            if (buffersReady) {
+                imgCam1.src = 'data:image/jpeg;base64,' + data.image;
+            }
+        });
+
+        socket.on('image_cam2', (data) => {
+            if (buffersReady) {
+                imgCam2.src = 'data:image/jpeg;base64,' + data.image;
+            }
+        });
+
+        socket.on('buffer_update', (data) => {
+            currentBufferSize = data.size;
+            const progress = Math.min(100, (currentBufferSize / 50) * 100);
+            progressBar.style.width = `${progress}%`;
+            loadingText.textContent = `Preparando buffers: ${currentBufferSize}/50`;
+            checkBuffersReady();
+        });
+
+        setInterval(updateDisplayedTime, 1000);
+
+        // Inicializar
+        updateDisplayedTime();
+        socket.emit('init_stream');
+    </script>
 </body>
 </html>
