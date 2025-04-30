@@ -56,7 +56,7 @@
     <!-- Pantalla de carga -->
     <div id="loadingScreen" class="loading-screen">
         <h2 class="text-2xl font-semibold text-blue-400 mb-4">Cargando cámaras...</h2>
-        <p class="text-gray-300 mb-2" id="loadingText">Preparando buffers: 0/100</p>
+        <p class="text-gray-300 mb-2" id="loadingText">Configurando camaras: 0/100</p>
         <div class="progress-bar">
             <div id="progressBar" class="progress"></div>
         </div>
@@ -64,7 +64,7 @@
 
     <!-- Contenido principal (oculto inicialmente) -->
     <div id="mainContent" class="hidden bg-gray-800 p-8 rounded-lg shadow-lg max-w-5xl w-full text-center">
-        <h1 class="text-2xl font-semibold text-blue-400 mb-6">Visor de Cámaras de Vigilancia</h1>
+        <h1 class="text-2xl font-semibold text-blue-400 mb-6">Cámaras de Vigilancia</h1>
         
         <div class="bg-gray-700 p-4 rounded-lg shadow-md mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="camera-container">
@@ -219,7 +219,7 @@
                     // Llegamos al final del buffer, volver a live
                     switchToLiveMode();
                 }
-            }, 500); // Más rápido (500ms en lugar de 1000ms)
+            }, 260);
         }
 
         function timeToSeconds(timeStr) {

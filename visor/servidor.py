@@ -13,7 +13,7 @@ app.config['SECRET_KEY'] = 'clave_secreta'
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 
 # Configuración de buffers
-BUFFER_SIZE = 6000  # 10 minutos a ~10fps (10*60*10)
+BUFFER_SIZE = 3000  # 5 minutos a ~10fps (10*60*5)
 MIN_BUFFER_TO_START = 100  # Buffer mínimo para comenzar
 
 # Buffers para cada cámara
