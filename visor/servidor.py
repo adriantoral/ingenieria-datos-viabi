@@ -1,89 +1,89 @@
+import eventlet
+eventlet.monkey_patch()
+
 import base64
 from collections import deque
 from datetime import datetime
-
 import cv2
-import eventlet
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
 
-eventlet.monkey_patch( )
-
-app = Flask( __name__ )
+app = Flask(__name__)
 app.config['SECRET_KEY'] = 'clave_secreta'
-socketio = SocketIO( app, cors_allowed_origins="*", async_mode='eventlet' )
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 
-# Cambiar el tamaño del buffer para almacenar 2 minutos de imágenes
-BUFFER_SIZE = 2400  # 20 FPS * 120 segundos = 2400 imágenes para 2 minutos
-image_buffer = deque( maxlen=BUFFER_SIZE )
-time_buffer = deque( maxlen=BUFFER_SIZE )
+# Configuración de buffers
+BUFFER_SIZE = 3000  # 5 minutos a ~10fps (10*60*5)
+MIN_BUFFER_TO_START = 100  # Buffer mínimo para comenzar
 
-latest_image = None  # Última imagen en vivo
-latest_time = None  # Última hora de la imagen en vivo
+# Buffers para cada cámara
+buffer_cam1 = deque(maxlen=BUFFER_SIZE)
+buffer_cam2 = deque(maxlen=BUFFER_SIZE)
+buffer_timestamps = deque(maxlen=BUFFER_SIZE)
 
+stream_active = False
 
-@app.route( '/' )
-def index ( ):
-	return render_template( 'index.html' )
+@app.route('/')
+def index():
+    return render_template('index.html')
 
+@socketio.on('init_stream')
+def handle_init_stream():
+    global stream_active
+    if not stream_active:
+        stream_active = True
+        socketio.start_background_task(start_stream)
 
-@app.route( '/segundo_visores' )
-def segundo_visores ( ):
-	return render_template( 'segundo_visores.html' )
+def start_stream():
+    cap1 = cv2.VideoCapture(0)
+    cap2 = cv2.VideoCapture(1)
+    
+    try:
+        while True:
+            ret1, frame1 = cap1.read()
+            ret2, frame2 = cap2.read()
 
+            if not ret1 or not ret2:
+                print("Error leyendo frames de las cámaras")
+                break
 
-@socketio.on( 'start_stream' )
-def start_stream ( ):
-	global latest_image, latest_time
-	cap = cv2.VideoCapture( 0 )
+            # Procesar frames
+            _, buffer1 = cv2.imencode('.jpg', frame1)
+            _, buffer2 = cv2.imencode('.jpg', frame2)
 
-	while True:
-		ret, frame = cap.read( )
-		if not ret:
-			break
+            frame_base64_1 = base64.b64encode(buffer1).decode('utf-8')
+            frame_base64_2 = base64.b64encode(buffer2).decode('utf-8')
+            current_time = datetime.now().strftime("%H:%M:%S")
 
-		# Codificar la imagen a base64
-		_, buffer = cv2.imencode( '.jpg', frame )
-		frame_base64 = base64.b64encode( buffer ).decode( 'utf-8' )
+            # Almacenar en buffers
+            buffer_cam1.append(frame_base64_1)
+            buffer_cam2.append(frame_base64_2)
+            buffer_timestamps.append(current_time)
 
-		# Obtener la hora actual
-		current_time = datetime.now( ).strftime( "%H:%M:%S" )
+            # Calcular porcentaje de carga
+            buffer_percent = min(100, (len(buffer_cam1) / MIN_BUFFER_TO_START) * 100)
+            
+            # Enviar actualización del buffer
+            socketio.emit('buffer_update', {
+                'size': len(buffer_cam1),
+                'percent': buffer_percent,
+                'total': MIN_BUFFER_TO_START
+            })
 
-		latest_image = frame_base64  # Guardar la última imagen en vivo
-		latest_time = current_time  # Guardar la última hora
+            # Enviar imágenes en tiempo real
+            if len(buffer_cam1) >= MIN_BUFFER_TO_START:
+                socketio.emit('image_cam1', {'image': frame_base64_1, 'time': current_time})
+                socketio.emit('image_cam2', {'image': frame_base64_2, 'time': current_time})
 
-		if len( image_buffer ) == BUFFER_SIZE:
-			image_buffer.popleft( )  # Eliminar la imagen más antigua cuando el buffer se llena
-			time_buffer.popleft( )  # Eliminar la hora más antigua
-
-		# Añadir la imagen y la hora al buffer
-		image_buffer.append( frame_base64 )
-		time_buffer.append( current_time )
-
-		# Emitir la imagen y la hora al cliente en vivo
-		emit( 'image', { 'image': frame_base64, 'time': current_time }, broadcast=True )
-		socketio.sleep( 0.05 )  # ~20 FPS
-
-	cap.release( )
-
-
-@socketio.on( 'get_buffered_image' )
-def get_buffered_image ( data ):
-	"""
-	Envía la imagen más reciente o una imagen del buffer con la hora.
-	"""
-	index = int( data.get( 'index', -1 ) )
-
-	if index == -1:  # Solicitud de la última imagen en vivo
-		if latest_image:
-			emit( 'buffered_image', { 'image': latest_image, 'time': latest_time } )
-		else:
-			emit( 'buffered_image', { 'error': 'No hay imágenes aún' } )
-	elif 0 <= index < len( image_buffer ):  # Asegurarse de que el índice esté dentro del buffer
-		emit( 'buffered_image', { 'image': image_buffer[index], 'time': time_buffer[index] } )
-	else:
-		emit( 'buffered_image', { 'error': 'Índice fuera de rango' } )
-
+            eventlet.sleep(0.1)  # Controlar la tasa de frames (~10fps)
+    except Exception as e:
+        print(f"Error en el stream: {str(e)}")
+    finally:
+        cap1.release()
+        cap2.release()
+        global stream_active
+        stream_active = False
+        print("Stream detenido")
 
 if __name__ == '__main__':
-	socketio.run( app, host='0.0.0.0', port=5000 )
+    socketio.run(app, host='0.0.0.0', port=5000, debug=True)
