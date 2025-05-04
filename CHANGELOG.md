@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/adriantoral/ingenieria-datos-viabi/compare/v1.7.0...v1.8.0) (2025-05-04)
+
+
+### Features
+
+* Cambios del visor de doble camara ([7475c0a](https://github.com/adriantoral/ingenieria-datos-viabi/commit/7475c0a4454feec90d2b94be623f5377a02c0446))
+
 # [1.7.0](https://github.com/adriantoral/ingenieria-datos-viabi/compare/v1.6.0...v1.7.0) (2025-04-02)
 
 
