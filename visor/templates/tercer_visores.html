@@ -11,7 +11,27 @@
     <h1 class="text-2xl font-semibold text-blue-400 mb-6"> Visor de Intrusión </h1>
     
     <div class="bg-gray-700 p-4 rounded-lg shadow-md mb-6">
-      <img id="clip-image" src="" alt="Frame" class="rounded-md border-2 border-blue-500 mx-auto max-w-full h-auto">
+      {% if images %}
+          <div id="clip-container">
+              <img id="clip-frame" src="{{ images[0] }}" alt="Intrusion Frame" style="max-width: 90%;">
+          </div>
+
+          <script>
+              const frames = {{ images|tojson }};
+              let index = 0;
+              const frameDelay = 300; // milisegundos entre frames (~3 FPS)
+
+              function showNextFrame() {
+                  const img = document.getElementById("clip-frame");
+                  img.src = frames[index];
+                  index = (index + 1) % frames.length;
+              }
+
+              setInterval(showNextFrame, frameDelay);
+          </script>
+      {% else %}
+          <p>No se encontraron imágenes para el evento.</p>
+      {% endif %}
     </div>
 
     <a href="{{ url_for('segundo_visores') }}">
@@ -25,20 +45,5 @@
       </button>
     </a>
   </div>
-
-  <script>
-    // Inyecta la lista de URLs de los frames desde Flask
-    const intrusionImages = {{ images|tojson|safe }};
-    let index = 0;
-    function showNextImage() {
-      if (intrusionImages.length > 0) {
-        document.getElementById("clip-image").src = intrusionImages[index];
-        index = (index + 1) % intrusionImages.length;
-      }
-    }
-    // Cambia la imagen cada 500 ms (ajusta según prefieras)
-    setInterval(showNextImage, 500);
-    showNextImage();
-  </script>
 </body>
 </html>

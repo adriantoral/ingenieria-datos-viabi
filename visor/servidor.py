@@ -7,9 +7,9 @@ import cv2
 import base64
 from collections import deque
 import os
-import random
 from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
+from datetime import timedelta
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'clave_secreta'
@@ -21,20 +21,20 @@ latest_image = None  # Última imagen en vivo
 
 # Configuración de InfluxDB
 CONFIG_INFLUX = {
-    'url'   : os.getenv( 'CONFIG_INFLUX_URL' ),
+	'url'   : os.getenv( 'CONFIG_INFLUX_URL' ),
 	'token' : os.getenv( 'CONFIG_INFLUX_TOKEN' ),
-	'org'   : os.getenv( 'CONFIG_INFLUX_ORG' )
+	'org'   : os.getenv( 'CONFIG_INFLUX_ORG' ),
+	'bucket': os.getenv( 'CONFIG_INFLUX_BUCKET' )
 }
 
 # Cliente de InfluxDB
-client = InfluxDBClient(
-    url=CONFIG_INFLUX["url"],
-    token=CONFIG_INFLUX["token"],
-    org=CONFIG_INFLUX["org"]
+_influx_client = InfluxDBClient(
+	url=CONFIG_INFLUX['url'],
+	token=CONFIG_INFLUX['token'],
+	org=CONFIG_INFLUX['org']
 )
 
-query_api = client.query_api()
-bucket = os.getenv("CONFIG_INFLUX_BUCKET")
+query_api = _influx_client.query_api()
 
 @app.route('/')
 def index():
@@ -47,14 +47,15 @@ def segundo_visores():
     return render_template('segundo_visores.html')
 
 def get_recent_intrusions():
-    """Devuelve lista de (timestamp, image_url) para intrusiones recientes (prob > 0.9 y flagged)"""
+    """Devuelve lista de (timestamp, probability) para intrusiones recientes"""
     query = f'''
     from(bucket: "{CONFIG_INFLUX['bucket']}")
-      |> range(start: -1h)
+      |> range(start: -6h)
       |> filter(fn: (r) => r._measurement == "intrusion_event")
-      |> filter(fn: (r) => r.probability >= 0.9 and r.flagged == 1)
-      |> keep(columns: ["_time", "image_url"])
+      |> filter(fn: (r) => r._field == "probability" and r._value > 0.9)
+      |> keep(columns: ["_time", "_value"])
       |> sort(columns: ["_time"])
+      |> limit(n:1)
     '''
 
     result = query_api.query(org=CONFIG_INFLUX["org"], query=query)
@@ -63,12 +64,10 @@ def get_recent_intrusions():
     for table in result:
         for record in table.records:
             timestamp = record.get_time()
-            image_url = record.values.get("image_url")
-            if timestamp and image_url:
-                intrusions.append((timestamp, image_url))
+            prob = record.get_value()
+            intrusions.append((timestamp, prob))
     
     return intrusions
-
 
 def get_clip_images(event_time):
     """Recupera todas las imágenes ±2s desde el timestamp de un evento"""
@@ -79,7 +78,8 @@ def get_clip_images(event_time):
     from(bucket: "{CONFIG_INFLUX['bucket']}")
       |> range(start: time(v: "{t0}"), stop: time(v: "{t1}"))
       |> filter(fn: (r) => r._measurement == "intrusion_event")
-      |> keep(columns: ["_time", "image_url"])
+      |> filter(fn: (r) => r._field == "image_url")
+      |> keep(columns: ["_time", "_value"])
       |> sort(columns: ["_time"])
     '''
 
@@ -88,7 +88,7 @@ def get_clip_images(event_time):
 
     for table in result:
         for record in table.records:
-            url = record.values.get("image_url")
+            url = record.get_value()
             if url:
                 images.append(url)
     
@@ -104,7 +104,7 @@ def tercer_visores():
     latest_time, _ = intrusions[-1]
     image_urls = get_clip_images(latest_time)
 
-    return render_template("visor_clip.html", images=image_urls)
+    return render_template("tercer_visores.html", images=image_urls)
 
 @socketio.on('start_stream')
 def start_stream():
