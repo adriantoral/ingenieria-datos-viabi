@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visor de Cámaras de Vigilancia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .progress-bar {
+            width: 80%;
+            max-width: 400px;
+            height: 20px;
+            background-color: #333;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        .progress {
+            height: 100%;
+            background-color: #3B82F6;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .hidden {
+            display: none;
+        }
+        .camera-timestamp {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        .camera-container {
+            position: relative;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen">
+
+    <!-- Pantalla de carga -->
+    <div id="loadingScreen" class="loading-screen">
+        <h2 class="text-2xl font-semibold text-blue-400 mb-4">Cargando cámaras...</h2>
+        <p class="text-gray-300 mb-2" id="loadingText">Configurando camaras: 0/100</p>
+        <div class="progress-bar">
+            <div id="progressBar" class="progress"></div>
+        </div>
+    </div>
+
+    <!-- Contenido principal (oculto inicialmente) -->
+    <div id="mainContent" class="hidden bg-gray-800 p-8 rounded-lg shadow-lg max-w-5xl w-full text-center">
+        <h1 class="text-2xl font-semibold text-blue-400 mb-6">Cámaras de Vigilancia</h1>
+        
+        <div class="bg-gray-700 p-4 rounded-lg shadow-md mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="camera-container">
+                <p class="text-blue-400 mb-2">Cámara 1</p>
+                <img id="videoCam1" alt="Esperando transmisión..." class="rounded-md border-2 border-blue-500 mx-auto max-w-full h-auto">
+                <div id="timestampCam1" class="camera-timestamp">00:00:00</div>
+            </div>
+            <div class="camera-container">
+                <p class="text-green-400 mb-2">Cámara 2</p>
+                <img id="videoCam2" alt="Esperando transmisión..." class="rounded-md border-2 border-green-500 mx-auto max-w-full h-auto">
+                <div id="timestampCam2" class="camera-timestamp">00:00:00</div>
+            </div>
+        </div>
+
+        <div class="mt-4 mb-6 flex items-center justify-center gap-4">
+            <button id="liveBtn" class="bg-red-600 text-white py-2 px-4 rounded-md shadow-md hover:bg-red-700 font-semibold">
+                LIVE 🔴
+            </button>
+        </div>
+
+        <div class="mt-6">
+            <input type="range" id="timeline" min="0" max="600" value="600" class="w-full"> <!-- Cambiado a 10 minutos -->
+            <p id="timestamp" class="text-blue-400 text-sm mt-2">Hora: 00:00:00 | Modo: <span id="modeIndicator">LIVE</span></p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
+    <script>
+        const socket = io();
+        
+        const imgCam1 = document.getElementById('videoCam1');
+        const imgCam2 = document.getElementById('videoCam2');
+        const timestampCam1 = document.getElementById('timestampCam1');
+        const timestampCam2 = document.getElementById('timestampCam2');
+        const timestampDisplay = document.getElementById("timestamp");
+        const timeline = document.getElementById("timeline");
+        const loadingScreen = document.getElementById("loadingScreen");
+        const mainContent = document.getElementById("mainContent");
+        const loadingText = document.getElementById("loadingText");
+        const progressBar = document.getElementById("progressBar");
+        const liveBtn = document.getElementById('liveBtn');
+        const modeIndicator = document.getElementById('modeIndicator');
+        
+        // Estado de la aplicación
+        let appState = {
+            currentRealTime: 0,
+            isLive: true,
+            buffersReady: false,
+            currentBufferSize: 0,
+            buffer: {
+                cam1: [],
+                cam2: [],
+                timestamps: []
+            },
+            playbackInterval: null,
+            currentPlaybackIndex: 0,
+            isPlayingHistory: false,
+            playbackSpeed: 2 // Velocidad de reproducción (2x)
+        };
+
+        function formatTime(totalSeconds) {
+            const date = new Date(totalSeconds * 1000);
+            return date.toISOString().substr(11, 8);
+        }
+
+        function updateDisplayedTime() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const seconds = now.getSeconds();
+            appState.currentRealTime = hours * 3600 + minutes * 60 + seconds;
+            
+            if (appState.isLive) {
+                const displayTime = appState.currentRealTime;
+                timestampDisplay.textContent = `Hora: ${formatTime(displayTime)} | Modo: LIVE`;
+                modeIndicator.textContent = "LIVE";
+                timeline.value = 600; // 10 minutos
+            } else {
+                const secondsFromNow = 600 - timeline.value;
+                const displayTime = appState.currentRealTime - secondsFromNow;
+                timestampDisplay.textContent = `Hora: ${formatTime(displayTime)} | Modo: HISTÓRICO`;
+                modeIndicator.textContent = "HISTÓRICO";
+            }
+        }
+
+        function checkBuffersReady() {
+            if (!appState.buffersReady && appState.currentBufferSize >= 100) {
+                appState.buffersReady = true;
+                loadingScreen.classList.add('hidden');
+                mainContent.classList.remove('hidden');
+                socket.emit('start_stream');
+            }
+        }
+
+        function findClosestFrame(targetTime) {
+            if (appState.buffer.timestamps.length === 0) return -1;
+            
+            let closestIndex = 0;
+            let smallestDiff = Infinity;
+            const targetSeconds = targetTime % 86400; // Asegurarnos que está en el rango de 24h
+            
+            for (let i = 0; i < appState.buffer.timestamps.length; i++) {
+                const timeStr = appState.buffer.timestamps[i];
+                const [hours, minutes, seconds] = timeStr.split(':').map(Number);
+                const frameSeconds = hours * 3600 + minutes * 60 + seconds;
+                const diff = Math.abs(frameSeconds - targetSeconds);
+                
+                if (diff < smallestDiff) {
+                    smallestDiff = diff;
+                    closestIndex = i;
+                }
+            }
+            
+            return closestIndex;
+        }
+
+        function displayFrame(index) {
+            if (index >= 0 && index < appState.buffer.cam1.length) {
+                imgCam1.src = 'data:image/jpeg;base64,' + appState.buffer.cam1[index];
+                timestampCam1.textContent = appState.buffer.timestamps[index];
+            }
+            if (index >= 0 && index < appState.buffer.cam2.length) {
+                imgCam2.src = 'data:image/jpeg;base64,' + appState.buffer.cam2[index];
+                timestampCam2.textContent = appState.buffer.timestamps[index];
+            }
+            appState.currentPlaybackIndex = index;
+        }
+
+        function startHistoricalPlayback(startIndex) {
+            if (appState.playbackInterval) {
+                clearInterval(appState.playbackInterval);
+            }
+            
+            appState.isPlayingHistory = true;
+            appState.currentPlaybackIndex = startIndex;
+            
+            appState.playbackInterval = setInterval(() => {
+                if (appState.currentPlaybackIndex < appState.buffer.cam1.length - appState.playbackSpeed) {
+                    appState.currentPlaybackIndex += appState.playbackSpeed; // Avanzar más rápido
+                    displayFrame(appState.currentPlaybackIndex);
+                    
+                    // Actualizar la posición del timeline
+                    const now = new Date();
+                    const currentSeconds = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+                    const frameTime = timeToSeconds(appState.buffer.timestamps[appState.currentPlaybackIndex]);
+                    const secondsDiff = currentSeconds - frameTime;
+                    const timelineValue = Math.max(0, 600 - secondsDiff); // 10 minutos
+                    timeline.value = timelineValue;
+                    
+                    updateDisplayedTime();
+                } else {
+                    // Llegamos al final del buffer, volver a live
+                    switchToLiveMode();
+                }
+            }, 260);
+        }
+
+        function timeToSeconds(timeStr) {
+            const [hours, minutes, seconds] = timeStr.split(':').map(Number);
+            return hours * 3600 + minutes * 60 + seconds;
+        }
+
+        function switchToLiveMode() {
+            appState.isLive = true;
+            appState.isPlayingHistory = false;
+            if (appState.playbackInterval) {
+                clearInterval(appState.playbackInterval);
+                appState.playbackInterval = null;
+            }
+            liveBtn.classList.add('bg-red-600');
+            liveBtn.classList.remove('bg-gray-600');
+            updateDisplayedTime();
+        }
+
+        timeline.addEventListener("input", function() {
+            appState.isLive = false;
+            appState.isPlayingHistory = false;
+            liveBtn.classList.remove('bg-red-600');
+            liveBtn.classList.add('bg-gray-600');
+            
+            if (appState.playbackInterval) {
+                clearInterval(appState.playbackInterval);
+            }
+            
+            const secondsFromNow = 600 - timeline.value; // 10 minutos
+            const targetTime = appState.currentRealTime - secondsFromNow;
+            const closestIndex = findClosestFrame(targetTime);
+            displayFrame(closestIndex);
+            updateDisplayedTime();
+        });
+
+        timeline.addEventListener("change", function() {
+            if (!appState.isLive) {
+                const secondsFromNow = 600 - timeline.value; // 10 minutos
+                const targetTime = appState.currentRealTime - secondsFromNow;
+                const closestIndex = findClosestFrame(targetTime);
+                startHistoricalPlayback(closestIndex);
+            }
+        });
+
+        liveBtn.addEventListener('click', switchToLiveMode);
+
+        socket.on('image_cam1', (data) => {
+            if (appState.buffersReady) {
+                if (appState.isLive) {
+                    imgCam1.src = 'data:image/jpeg;base64,' + data.image;
+                    timestampCam1.textContent = data.time;
+                }
+                // Siempre actualizamos el buffer
+                appState.buffer.cam1.push(data.image);
+                appState.buffer.timestamps.push(data.time);
+                
+                // Mantenemos el buffer con un tamaño mayor (10 minutos a ~10fps)
+                if (appState.buffer.cam1.length > 6000) { // 10 minutos * 60 segundos * 10fps
+                    appState.buffer.cam1.shift();
+                    appState.buffer.timestamps.shift();
+                }
+            }
+        });
+
+        socket.on('image_cam2', (data) => {
+            if (appState.buffersReady) {
+                if (appState.isLive) {
+                    imgCam2.src = 'data:image/jpeg;base64,' + data.image;
+                    timestampCam2.textContent = data.time;
+                }
+                // Siempre actualizamos el buffer
+                appState.buffer.cam2.push(data.image);
+                
+                // Mantenemos el buffer sincronizado
+                if (appState.buffer.cam2.length > 6000) {
+                    appState.buffer.cam2.shift();
+                }
+            }
+        });
+
+        socket.on('buffer_update', (data) => {
+            appState.currentBufferSize = data.size;
+            const progress = Math.min(100, (appState.currentBufferSize / 100) * 100);
+            progressBar.style.width = `${progress}%`;
+            loadingText.textContent = `Preparando buffers: ${appState.currentBufferSize}/100`;
+            checkBuffersReady();
+        });
+
+        setInterval(updateDisplayedTime, 1000);
+
+        // Inicializar
+        updateDisplayedTime();
+        socket.emit('init_stream');
+    </script>
+</body>
+</html>
