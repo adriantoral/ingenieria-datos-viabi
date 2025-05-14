@@ -21,10 +21,10 @@ latest_image = None  # Última imagen en vivo
 
 # Configuración de InfluxDB
 CONFIG_INFLUX = {
-    'url'   : "http://localhost:8086",
-    'token' : "ohypHupASVyeVyPeEcnuvruggxoC4lIX9hqaqzOmPN8tzB7Ew0vE1TAN2GB3gSY0VUETfZzbbGyPFd_F7P-Qcg==",
-    'org'   : "miorganizacion",
-    'bucket': "mibucket"
+	'url'   : os.getenv( 'CONFIG_INFLUX_URL' ),
+	'token' : os.getenv( 'CONFIG_INFLUX_TOKEN' ),
+	'org'   : os.getenv( 'CONFIG_INFLUX_ORG' ),
+	'bucket': os.getenv( 'CONFIG_INFLUX_BUCKET' )
 }
 
 # Cliente de InfluxDB
@@ -50,11 +50,12 @@ def get_recent_intrusions():
     """Devuelve lista de (timestamp, probability) para intrusiones recientes"""
     query = f'''
     from(bucket: "{CONFIG_INFLUX['bucket']}")
-      |> range(start: -48h)
+      |> range(start: -6h)
       |> filter(fn: (r) => r._measurement == "intrusion_event")
       |> filter(fn: (r) => r._field == "probability" and r._value > 0.9)
       |> keep(columns: ["_time", "_value"])
       |> sort(columns: ["_time"])
+      |> limit(n:1)
     '''
 
     result = query_api.query(org=CONFIG_INFLUX["org"], query=query)
