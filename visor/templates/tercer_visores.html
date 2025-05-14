@@ -34,16 +34,11 @@
       {% endif %}
     </div>
 
-    <a href="{{ url_for('segundo_visores') }}">
-      <button class="bg-blue-500 text-white py-2 px-6 rounded-md shadow-md hover:bg-blue-600 mb-4">
-        Ir al Visor con Línea de Tiempo
+    <div class="mt-4 mb-6 flex items-center justify-center gap-4">
+      <button id="liveBtn" class="bg-red-600 text-white py-2 px-4 rounded-md shadow-md hover:bg-red-700 font-semibold">
+          LIVE 🔴
       </button>
-    </a>
-    <a href="{{ url_for('index') }}">
-      <button class="bg-blue-500 text-white py-2 px-6 rounded-md shadow-md hover:bg-blue-600">
-        Ir al Visor en Tiempo Real
-      </button>
-    </a>
+  </div>
   </div>
 </body>
 </html>
