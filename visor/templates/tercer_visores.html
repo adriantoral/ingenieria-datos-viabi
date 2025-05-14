@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title> Visor de Intrusión </title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen">
+  <div class="bg-gray-800 p-8 rounded-lg shadow-lg max-w-3xl w-full text-center">
+    <h1 class="text-2xl font-semibold text-blue-400 mb-6"> Visor de Intrusión </h1>
+    
+    <div class="bg-gray-700 p-4 rounded-lg shadow-md mb-6">
+      {% if images %}
+          <div id="clip-container">
+              <img id="clip-frame" src="{{ images[0] }}" alt="Intrusion Frame" style="max-width: 90%;">
+          </div>
+
+          <script>
+              const frames = {{ images|tojson }};
+              let index = 0;
+              const frameDelay = 300; // milisegundos entre frames (~3 FPS)
+
+              function showNextFrame() {
+                  const img = document.getElementById("clip-frame");
+                  img.src = frames[index];
+                  index = (index + 1) % frames.length;
+              }
+
+              setInterval(showNextFrame, frameDelay);
+          </script>
+      {% else %}
+          <p>No se encontraron imágenes para el evento.</p>
+      {% endif %}
+    </div>
+
+    <a href="{{ url_for('segundo_visores') }}">
+      <button class="bg-blue-500 text-white py-2 px-6 rounded-md shadow-md hover:bg-blue-600 mb-4">
+        Ir al Visor con Línea de Tiempo
+      </button>
+    </a>
+    <a href="{{ url_for('index') }}">
+      <button class="bg-blue-500 text-white py-2 px-6 rounded-md shadow-md hover:bg-blue-600">
+        Ir al Visor en Tiempo Real
+      </button>
+    </a>
+  </div>
+</body>
+</html>
