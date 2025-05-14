@@ -1,3 +1,14 @@
+# [1.9.0](https://github.com/adriantoral/ingenieria-datos-viabi/compare/v1.8.0...v1.9.0) (2025-05-14)
+
+
+### Features
+
+* conexión con InfluxDB ([f66682a](https://github.com/adriantoral/ingenieria-datos-viabi/commit/f66682a39042b0713d7f1c5fdedeef77f0e7f66b))
+* frames del visor ([fc9ce92](https://github.com/adriantoral/ingenieria-datos-viabi/commit/fc9ce92cfbd9f319157bdfee5d6e08c9f922b888))
+* visor con influxDB ([8a4572f](https://github.com/adriantoral/ingenieria-datos-viabi/commit/8a4572faaaa7592b1f9ea1b3502bd448612a7888))
+* visor de intrusión estático ([a38c412](https://github.com/adriantoral/ingenieria-datos-viabi/commit/a38c4124e62c8bfd6dcc5bef0b875c3e984954a5))
+* visor en tiempo real ([d72d898](https://github.com/adriantoral/ingenieria-datos-viabi/commit/d72d8988696c5a096f10dd038a9bcb3ed6faee73))
+
 # [1.8.0](https://github.com/adriantoral/ingenieria-datos-viabi/compare/v1.7.0...v1.8.0) (2025-05-04)
 
 
